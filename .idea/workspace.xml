@@ -4,16 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="Oh dear. I uhhhh fixed enemy vision and highlighting (changed a ton actually). I also finally fixed the zombie AI yay. Next up is refining combat then adding sound patterns.">
-      <change afterPath="$PROJECT_DIR$/.idea/TkinterDungeonCrawler.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pyinstall.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/zicon.png" afterDir="false" />
+    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="Ok I actually actually actually fixed vision and highlighting. Optimized it too, while I was at it. Only configures tiles in new_light_levels and newly darkened tiles. Hopefully this is it for lighting. Next thing is making the enemy class have children class like zombie, rat, etc.">
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,13 +20,36 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="PREVIOUS_COMMIT_AUTHORS">
+      <list>
+        <option value="Nahnot &lt;chavez.darren.f@gmail.com&gt;" />
+      </list>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Nahnot&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Nahnot/TkinterDungeonCrawler&quot;,
+    &quot;accountId&quot;: &quot;93054c4d-049c-4b2f-a2b8-12a151058551&quot;
+  }
+}</component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
   </component>
   <component name="ProblemsViewState">
+    <hideBySeverity>
+      <option value="11" />
+      <option value="14" />
+      <option value="15" />
+      <option value="16" />
+    </hideBySeverity>
     <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
@@ -109,10 +124,79 @@
       <option name="presentableId" value="Default" />
       <updated>1768677758013</updated>
     </task>
+    <task id="LOCAL-00001" summary="Oh dear. I uhhhh fixed enemy vision and highlighting (changed a ton actually). I also finally fixed the zombie AI yay. Next up is refining combat then adding sound patterns.">
+      <option name="closed" value="true" />
+      <created>1769489353441</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1769489353441</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Oh dear. I uhhhh fixed enemy vision and highlighting (changed a ton actually). I also finally fixed the zombie AI yay. Next up is refining combat then adding sound patterns.">
+      <option name="closed" value="true" />
+      <created>1769489494443</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1769489494443</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Oh dear. I uhhhh fixed enemy vision and highlighting (changed a ton actually). I also finally fixed the zombie AI yay. Next up is refining combat then adding sound patterns.">
+      <option name="closed" value="true" />
+      <created>1769489743698</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1769489743698</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Oh dear. I uhhhh fixed enemy vision and highlighting (changed a ton actually). I also finally fixed the zombie AI yay. Next up is refining combat then adding sound patterns.">
+      <option name="closed" value="true" />
+      <created>1769489808134</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1769489808134</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Oh dear. I uhhhh fixed enemy vision and highlighting (changed a ton actually). I also finally fixed the zombie AI yay. Next up is refining combat then adding sound patterns.">
+      <option name="closed" value="true" />
+      <created>1769489983417</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1769489983417</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Oh dear. I uhhhh fixed enemy vision and highlighting (changed a ton actually). I also finally fixed the zombie AI yay. Next up is refining combat then adding sound patterns.">
+      <option name="closed" value="true" />
+      <created>1769490484857</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1769490484857</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Ok I actually actually actually fixed vision and highlighting. Optimized it too, while I was at it. Only configures tiles in new_light_levels and newly darkened tiles. Hopefully this is it for lighting. Next thing is making the enemy class have children class like zombie, rat, etc.">
+      <option name="closed" value="true" />
+      <created>1769816328175</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1769816328176</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Oh dear. I uhhhh fixed enemy vision and highlighting (changed a ton actually). I also finally fixed the zombie AI yay. Next up is refining combat then adding sound patterns." />
-    <option name="LAST_COMMIT_MESSAGE" value="Oh dear. I uhhhh fixed enemy vision and highlighting (changed a ton actually). I also finally fixed the zombie AI yay. Next up is refining combat then adding sound patterns." />
+    <MESSAGE value="Ok I actually actually actually fixed vision and highlighting. Optimized it too, while I was at it. Only configures tiles in new_light_levels and newly darkened tiles. Hopefully this is it for lighting. Next thing is making the enemy class have children class like zombie, rat, etc." />
+    <option name="LAST_COMMIT_MESSAGE" value="Ok I actually actually actually fixed vision and highlighting. Optimized it too, while I was at it. Only configures tiles in new_light_levels and newly darkened tiles. Hopefully this is it for lighting. Next thing is making the enemy class have children class like zombie, rat, etc." />
   </component>
 </project>
