@@ -83,11 +83,16 @@ INVENTORY_BTN_HEIGHT_IN_PIXELS = 83
 
 FRAME_SIZE_GAP = 2
 BTN_PAD = FRAME_SIZE_GAP / 2
-DUNGEON_FRAME_WIDTH = DUNGEON_BTN_WIDTH_IN_PIXELS + FRAME_SIZE_GAP
-DUNGEON_FRAME_HEIGHT = DUNGEON_BTN_HEIGHT_IN_PIXELS + FRAME_SIZE_GAP
-INVENTORY_FRAME_WIDTH = INVENTORY_BTN_WIDTH_IN_PIXELS + FRAME_SIZE_GAP
-INVENTORY_FRAME_HEIGHT = INVENTORY_BTN_HEIGHT_IN_PIXELS + FRAME_SIZE_GAP
-
+if not macOS:
+    DUNGEON_FRAME_WIDTH = DUNGEON_BTN_WIDTH_IN_PIXELS + FRAME_SIZE_GAP
+    DUNGEON_FRAME_HEIGHT = DUNGEON_BTN_HEIGHT_IN_PIXELS + FRAME_SIZE_GAP
+    INVENTORY_FRAME_WIDTH = INVENTORY_BTN_WIDTH_IN_PIXELS + FRAME_SIZE_GAP
+    INVENTORY_FRAME_HEIGHT = INVENTORY_BTN_HEIGHT_IN_PIXELS + FRAME_SIZE_GAP
+else:
+    DUNGEON_FRAME_WIDTH = DUNGEON_BTN_WIDTH_IN_PIXELS
+    DUNGEON_FRAME_HEIGHT = DUNGEON_BTN_HEIGHT_IN_PIXELS
+    INVENTORY_FRAME_WIDTH = INVENTORY_BTN_WIDTH_IN_PIXELS
+    INVENTORY_FRAME_HEIGHT = INVENTORY_BTN_HEIGHT_IN_PIXELS
 direction_map = {
     (-1, -1): 'up_left',
     (-1, 0): 'up',
@@ -731,11 +736,11 @@ class Player:
                     case 'period':
                         self.highlight_direction = 'down_right'
             self.determine_vision_direction()
-            self.change_vision = True
+            self.change_vision = False
             if self.prev_highlight_direction != self.highlight_direction:
                 self.determine_highlighted_button()
             if self.prev_vision_direction != self.vision_direction:
-                self.change_vision = False
+                self.change_vision = True
                 for enemy in dungeon.current_enemies.values():
                     enemy.steps_to_highlight_button()
             self.render_vision()
@@ -858,9 +863,9 @@ class Enemy:
         self.max_hp = max_hp
         self.movement_length = movement_length
 
-        self.state = 'freeze'
-        self.prev_state = 'freeze'
-        self.prev_prev_state = 'freeze'
+        self.state = 'idle'
+        self.prev_state = 'idle'
+        self.prev_prev_state = 'idle'
 
         self.highlight_direction = 'right'
         self.prev_highlight_direction = 'right'

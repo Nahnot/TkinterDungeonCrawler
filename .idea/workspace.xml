@@ -180,7 +180,23 @@
       <option name="project" value="LOCAL" />
       <updated>1769816328176</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Ok I actually actually actually fixed vision and highlighting. Optimized it too, while I was at it. Only configures tiles in new_light_levels and newly darkened tiles. Hopefully this is it for lighting. Next thing is making the enemy class have children class like zombie, rat, etc.">
+      <option name="closed" value="true" />
+      <created>1769816581958</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1769816581958</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Ok I actually actually actually fixed vision and highlighting. Optimized it too, while I was at it. Only configures tiles in new_light_levels and newly darkened tiles. Hopefully this is it for lighting. Next thing is making the enemy class have children class like zombie, rat, etc.">
+      <option name="closed" value="true" />
+      <created>1769816593254</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1769816593254</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
