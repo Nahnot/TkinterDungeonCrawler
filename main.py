@@ -531,12 +531,16 @@ class Inventory:
             self.weapon_selected = True
             player.force_diagonal_highlight_direction()
             player.determine_vision_direction()
-            if player.prev_vision_direction != player.vision_direction:
-                player.render_vision()
         else:
             self.weapon_selected = False
+
+        player.change_vision = False
+        if '_' in player.highlight_direction:
+            player.attack_mode = True
+        else:
+            player.attack_mode = False
         player.determine_highlighted_button()
-        player.erase_highlight_of_prev_highlighted_button()
+        player.render_vision()
         player.apply_highlight_to_button()
 
 
@@ -560,6 +564,9 @@ class Player:
         self.hp = self.max_hp
         self.speed = 5
         self.damage = 1
+
+        self.highlighting_diagonally_adjacent_tile = False  # an entity can only attack diagonals
+        self.attack_mode = False
 
         self.init_every_level()
 
@@ -595,7 +602,7 @@ class Player:
             self.vision_direction = self.highlight_direction
 
     def determine_highlighted_button(self):
-        if inv.weapon_selected:
+        if inv.weapon_selected and self.attack_mode:
             self.highlight_color = game.attack_color
         else:
             self.highlight_color = game.default_highlight_color
@@ -654,33 +661,34 @@ class Player:
     def interact(self):
         print('interaction')
         interacted_tile = dungeon.tiles_indexed_by_coords[tuple(self.highlighted_coords)]
-        interacted_btn = interacted_tile[get_btn]
-        interacted_spot = interacted_btn['text']
-        print(f'interacted_spot: {interacted_spot}')
-        if interacted_spot == game.chest:
-            print('chest interaction')
-            #chest.open(self.btn_highlighted_coords)
-        elif (interacted_spot == game.bars or interacted_spot == game.door) and inv.selected_item_slot[get_btn][
-            'text'] == game.key:
-            print('bars interaction')
-            interacted_btn.config(text=' ')
-            inv.destroy_item(game.key)
-        elif interacted_spot == game.exit:
-            print('exited room')
-            dungeon.next_level()
-        elif interacted_spot in game.interactable_singular_items:
-            for item in game.interactable_singular_items:
-                if item == interacted_spot:
-                    inv.pick_up_item(item)
-                    interacted_btn.config(text=' ')
-        elif interacted_spot in game.enemies and inv.weapon_selected:
-            for enemy in dungeon.current_enemies.values():
-                if enemy.tile_info == interacted_tile:
-                    Combat(attacker=self, attacked=enemy)
+        if self.rendered_light_levels[tuple(interacted_tile)] != 0:
+            interacted_btn = interacted_tile[get_btn]
+            interacted_spot = interacted_btn['text']
+            print(f'interacted_spot: {interacted_spot}')
+            if interacted_spot == game.chest:
+                print('chest interaction')
+                #chest.open(self.btn_highlighted_coords)
+            elif (interacted_spot == game.bars or interacted_spot == game.door) and inv.selected_item_slot[get_btn]['text'] == game.key:
+                print('bars interaction')
+                interacted_btn.config(text=' ')
+                inv.destroy_item(game.key)
+            elif interacted_spot == game.exit:
+                print('exited room')
+                dungeon.next_level()
+            elif interacted_spot in game.interactable_singular_items:
+                for item in game.interactable_singular_items:
+                    if item == interacted_spot:
+                        inv.pick_up_item(item)
+                        interacted_btn.config(text=' ')
+            elif interacted_spot in game.enemies and inv.weapon_selected and self.attack_mode:
+                for enemy in dungeon.current_enemies.values():
+                    if enemy.tile_info == interacted_tile:
+                        Combat(attacker=self, attacked=enemy)
 
-        game.advance_turn()
+            game.advance_turn()
 
     def parse_key_press(self, key):
+
         if key in ['w', 'a', 's', 'd']:
             match key:
                 case 'w':
@@ -699,6 +707,13 @@ class Player:
             else:
                 self.changed_location = True
 
+            if '_' in self.highlight_direction:
+                self.attack_mode = True
+            else:
+                self.attack_mode = False
+
+            if not self.change_vision:
+                self.change_vision = True
             if self.changed_location:
                 self.determine_highlighted_button()
                 self.render_vision()
@@ -707,44 +722,39 @@ class Player:
 
         elif key in 'uiojklm' or key in ['comma', 'period']:
             self.prev_highlight_direction = self.highlight_direction
-            if not inv.weapon_selected:
-                match key:
-                    case 'u':
-                        self.highlight_direction = 'up_left'
-                    case 'i':
-                        self.highlight_direction = 'up'
-                    case 'o':
-                        self.highlight_direction = 'up_right'
-                    case 'j':
-                        self.highlight_direction = 'left'
-                    case 'l':
-                        self.highlight_direction = 'right'
-                    case 'm':
-                        self.highlight_direction = 'down_left'
-                    case 'comma':
-                        self.highlight_direction = 'down'
-                    case 'period':
-                        self.highlight_direction = 'down_right'
+            match key:
+                case 'u':
+                    self.highlight_direction = 'up_left'
+                case 'i':
+                    self.highlight_direction = 'up'
+                case 'o':
+                    self.highlight_direction = 'up_right'
+                case 'j':
+                    self.highlight_direction = 'left'
+                case 'l':
+                    self.highlight_direction = 'right'
+                case 'm':
+                    self.highlight_direction = 'down_left'
+                case 'comma':
+                    self.highlight_direction = 'down'
+                case 'period':
+                    self.highlight_direction = 'down_right'
+            if '_' in self.highlight_direction:
+                self.attack_mode = True
             else:
-                match key:
-                    case 'u':
-                        self.highlight_direction = 'up_left'
-                    case 'o':
-                        self.highlight_direction = 'up_right'
-                    case 'm':
-                        self.highlight_direction = 'down_left'
-                    case 'period':
-                        self.highlight_direction = 'down_right'
+                self.attack_mode = False
             self.determine_vision_direction()
             self.change_vision = False
             if self.prev_highlight_direction != self.highlight_direction:
                 self.determine_highlighted_button()
             if self.prev_vision_direction != self.vision_direction:
                 self.change_vision = True
-                for enemy in dungeon.current_enemies.values():
-                    enemy.steps_to_highlight_button()
             self.render_vision()
-            self.apply_highlight_to_button()
+            for enemy in dungeon.current_enemies.values():
+                enemy.steps_to_highlight_button()
+
+            if self.prev_highlight_direction != self.highlight_direction:
+                self.apply_highlight_to_button()
 
         elif key == 'space':
             self.interact()
@@ -817,30 +827,37 @@ class Player:
         else:
             new_light_levels = self.rendered_light_levels
 
-        for (frame, btn), old_light_level in self.prev_rendered_light_levels.items():
-            if (frame, btn) in new_light_levels:
+        if self.change_vision:
+            for (frame, btn), old_light_level in self.prev_rendered_light_levels.items():
+                if (frame, btn) in new_light_levels:
 
-                new_light_level = new_light_levels[(frame, btn)]
+                    new_light_level = new_light_levels[(frame, btn)]
 
-                tile_color = game.lighting_colors[new_light_level]
+                    tile_color = game.lighting_colors[new_light_level]
 
-                frame.configure(bg=tile_color)
-                btn.configure(bg=tile_color, fg='black')
+                    frame.configure(bg=tile_color)
+                    btn.configure(bg=tile_color, fg='black')
 
-                self.rendered_light_levels[(frame, btn)] = new_light_level
+                    self.rendered_light_levels[(frame, btn)] = new_light_level
 
-            elif (frame, btn) not in new_light_levels and old_light_level != 0 and self.change_vision:
-                tile_color = game.lighting_colors[0]
-                frame.configure(bg=tile_color)
-                btn.configure(bg=tile_color, fg='black')
+                elif (frame, btn) not in new_light_levels and old_light_level != 0:
+                    tile_color = game.lighting_colors[0]
+                    frame.configure(bg=tile_color)
+                    btn.configure(bg=tile_color, fg='black')
 
-                self.rendered_light_levels[(frame, btn)] = 0
+                    self.rendered_light_levels[(frame, btn)] = 0
 
         if dungeon.finished_loading:
             prev_highlighted_tile = dungeon.tiles_indexed_by_coords[tuple(self.prev_highlighted_coords)]
             if self.rendered_light_levels[prev_highlighted_tile] == 0:
                 frame, btn = prev_highlighted_tile
                 tile_color = game.lighting_colors[0]
+                frame.configure(bg=tile_color)
+                btn.configure(bg=tile_color, fg='black')
+            elif not self.change_vision and self.rendered_light_levels[prev_highlighted_tile] != 0:
+                frame, btn = prev_highlighted_tile
+                light_level = self.rendered_light_levels[prev_highlighted_tile]
+                tile_color = game.lighting_colors[light_level]
                 frame.configure(bg=tile_color)
                 btn.configure(bg=tile_color, fg='black')
 
