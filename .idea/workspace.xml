@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="Ok I actually actually actually fixed vision and highlighting. Optimized it too, while I was at it. Only configures tiles in new_light_levels and newly darkened tiles. Hopefully this is it for lighting. Next thing is making the enemy class have children class like zombie, rat, etc.">
+    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="Ok well I was lying when I said highlighting and vision was fixed. So basically what I did was enable player to look orthogonally whenever player held weapon. That's how I figured out that my enemy highlighting is very botched (only specifically when I change vision direction) meaning that enemy highlight doesn't get restored when I look away then look back. HOPEFULLY THIS IS IT FOR HIGHLIGHTING AND VISION. I have a weird feeling that it's not though. Hoping against hope this isn't the case">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
@@ -66,6 +66,7 @@
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;Python.main.executor&quot;: &quot;Run&quot;,
     &quot;Python.pyinstall.executor&quot;: &quot;Run&quot;,
+    &quot;Python.testers.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
@@ -213,7 +214,15 @@
       <option name="project" value="LOCAL" />
       <updated>1769818651763</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="Ok well I was lying when I said highlighting and vision was fixed. So basically what I did was enable player to look orthogonally whenever player held weapon. That's how I figured out that my enemy highlighting is very botched (only specifically when I change vision direction) meaning that enemy highlight doesn't get restored when I look away then look back. HOPEFULLY THIS IS IT FOR HIGHLIGHTING AND VISION. I have a weird feeling that it's not though. Hoping against hope this isn't the case">
+      <option name="closed" value="true" />
+      <created>1769820276856</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1769820276856</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -233,6 +242,7 @@
     <MESSAGE value="Merge remote-tracking branch 'TkinterDungeonCrawler/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;main.py&#10;&#10;Ok I actually actually actually fixed vision and highlighting. Optimized it too, while I was at it. Only configures tiles in new_light_levels and newly darkened tiles. Hopefully this is it for lighting. Next thing is making the enemy class have children class like zombie, rat, etc." />
     <MESSAGE value="Merge remote-tracking branch 'TkinterDungeonCrawler/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml" />
     <MESSAGE value="Ok I actually actually actually fixed vision and highlighting. Optimized it too, while I was at it. Only configures tiles in new_light_levels and newly darkened tiles. Hopefully this is it for lighting. Next thing is making the enemy class have children class like zombie, rat, etc." />
-    <option name="LAST_COMMIT_MESSAGE" value="Ok I actually actually actually fixed vision and highlighting. Optimized it too, while I was at it. Only configures tiles in new_light_levels and newly darkened tiles. Hopefully this is it for lighting. Next thing is making the enemy class have children class like zombie, rat, etc." />
+    <MESSAGE value="Ok well I was lying when I said highlighting and vision was fixed. So basically what I did was enable player to look orthogonally whenever player held weapon. That's how I figured out that my enemy highlighting is very botched (only specifically when I change vision direction) meaning that enemy highlight doesn't get restored when I look away then look back. HOPEFULLY THIS IS IT FOR HIGHLIGHTING AND VISION. I have a weird feeling that it's not though. Hoping against hope this isn't the case" />
+    <option name="LAST_COMMIT_MESSAGE" value="Ok well I was lying when I said highlighting and vision was fixed. So basically what I did was enable player to look orthogonally whenever player held weapon. That's how I figured out that my enemy highlighting is very botched (only specifically when I change vision direction) meaning that enemy highlight doesn't get restored when I look away then look back. HOPEFULLY THIS IS IT FOR HIGHLIGHTING AND VISION. I have a weird feeling that it's not though. Hoping against hope this isn't the case" />
   </component>
 </project>
