@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="Ok well I was lying when I said highlighting and vision was fixed. So basically what I did was enable player to look orthogonally whenever player held weapon. That's how I figured out that my enemy highlighting is very botched (only specifically when I change vision direction) meaning that enemy highlight doesn't get restored when I look away then look back. HOPEFULLY THIS IS IT FOR HIGHLIGHTING AND VISION. I have a weird feeling that it's not though. Hoping against hope this isn't the case">
+    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="Again, I was lying about highlighting and vision. But first, I made enemy subclasses! (check the zombie class). Funny thing is, I refactored tile_info to tile_itself (cuz I like it when it goes player.tile_itself). Then it made highlighting go absolutely haywire. After struggling for a few hrs, I realized that in the Zombie class, tile_info was not changed to tile_itself, which is weird honestly. Back to highlighting and vision, I optimized rendering to my fullest ability, having to add many edge cases after. This did not really help the lag that much, and the biggest optimization I can make will probably be in the determine light levels. I will have to pre-compute every ray (meaning that I'll add another for loop inside the_pattern_forge yay!!!!!!!). I'll report on that when it's done.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
@@ -64,7 +64,7 @@
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;PROFILE_LINES&quot;,
     &quot;Python.pyinstall.executor&quot;: &quot;Run&quot;,
     &quot;Python.testers.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
@@ -73,7 +73,7 @@
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;last_opened_file_path&quot;: &quot;/Users/rizfc/PycharmProjects/TkinterDungeonCrawler&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;editor.preferences.folding&quot;
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
   }
 }</component>
   <component name="RecentsManager">
@@ -89,6 +89,7 @@
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
+        <env name="PC_LINE_PROFILER_STATS_FILENAME" value="main.py" />
       </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
@@ -114,7 +115,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-f2b7a9f6281b-6e1f45a539f7-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-253.29346.142" />
+        <option value="bundled-python-sdk-4762d8aabb82-6d6dccd035ac-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-253.30387.173" />
       </set>
     </attachedChunks>
   </component>
@@ -222,7 +223,31 @@
       <option name="project" value="LOCAL" />
       <updated>1769820276856</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Ok well I was lying when I said highlighting and vision was fixed. So basically what I did was enable player to look orthogonally whenever player held weapon. That's how I figured out that my enemy highlighting is very botched (only specifically when I change vision direction) meaning that enemy highlight doesn't get restored when I look away then look back. I also made enemy subclasses! (check the zombie class). Funny thing is, I refactored tile_info to tile_itself (cuz I like it when it goes player.tile_itself). Then it made highlighting go absolutely haywire. After struggling for a few hrs, I realized that in the Zombie class, tile_info was not changed to tile_itself, which is weird honestly. Back to highlighting and vision, I optimized rendering to my fullest ability, having to add many edge cases after. This did not really help the lag that much, and the biggest optimization I can make will probably be in the determine light levels. I will have to pre-compute every ray (meaning that I'll add another for loop inside the_pattern_forge yay!!!!!!!). I'll report on that when it's done.">
+      <option name="closed" value="true" />
+      <created>1769920017769</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1769920017769</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Again, I was lying about highlighting and vision. But first, I made enemy subclasses! (check the zombie class). Funny thing is, I refactored tile_info to tile_itself (cuz I like it when it goes player.tile_itself). Then it made highlighting go absolutely haywire. After struggling for a few hrs, I realized that in the Zombie class, tile_info was not changed to tile_itself, which is weird honestly. Back to highlighting and vision, I optimized rendering to my fullest ability, having to add many edge cases after. This did not really help the lag that much, and the biggest optimization I can make will probably be in the determine light levels. I will have to pre-compute every ray (meaning that I'll add another for loop inside the_pattern_forge yay!!!!!!!). I'll report on that when it's done.">
+      <option name="closed" value="true" />
+      <created>1769920216257</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1769920216257</updated>
+    </task>
+    <task id="LOCAL-00015" summary="Again, I was lying about highlighting and vision. But first, I made enemy subclasses! (check the zombie class). Funny thing is, I refactored tile_info to tile_itself (cuz I like it when it goes player.tile_itself). Then it made highlighting go absolutely haywire. After struggling for a few hrs, I realized that in the Zombie class, tile_info was not changed to tile_itself, which is weird honestly. Back to highlighting and vision, I optimized rendering to my fullest ability, having to add many edge cases after. This did not really help the lag that much, and the biggest optimization I can make will probably be in the determine light levels. I will have to pre-compute every ray (meaning that I'll add another for loop inside the_pattern_forge yay!!!!!!!). I'll report on that when it's done.">
+      <option name="closed" value="true" />
+      <created>1769920233871</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1769920233871</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -243,6 +268,9 @@
     <MESSAGE value="Merge remote-tracking branch 'TkinterDungeonCrawler/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml" />
     <MESSAGE value="Ok I actually actually actually fixed vision and highlighting. Optimized it too, while I was at it. Only configures tiles in new_light_levels and newly darkened tiles. Hopefully this is it for lighting. Next thing is making the enemy class have children class like zombie, rat, etc." />
     <MESSAGE value="Ok well I was lying when I said highlighting and vision was fixed. So basically what I did was enable player to look orthogonally whenever player held weapon. That's how I figured out that my enemy highlighting is very botched (only specifically when I change vision direction) meaning that enemy highlight doesn't get restored when I look away then look back. HOPEFULLY THIS IS IT FOR HIGHLIGHTING AND VISION. I have a weird feeling that it's not though. Hoping against hope this isn't the case" />
-    <option name="LAST_COMMIT_MESSAGE" value="Ok well I was lying when I said highlighting and vision was fixed. So basically what I did was enable player to look orthogonally whenever player held weapon. That's how I figured out that my enemy highlighting is very botched (only specifically when I change vision direction) meaning that enemy highlight doesn't get restored when I look away then look back. HOPEFULLY THIS IS IT FOR HIGHLIGHTING AND VISION. I have a weird feeling that it's not though. Hoping against hope this isn't the case" />
+    <MESSAGE value="Ok well I was lying when I said highlighting and vision was fixed. So basically what I did was enable player to look orthogonally whenever player held weapon. That's how I figured out that my enemy highlighting is very botched (only specifically when I change vision direction) meaning that enemy highlight doesn't get restored when I look away then look back. I also made enemy subclasses! (check the zombie class). Funny thing is, I refactored tile_info to tile_itself (cuz I like it when it goes player.tile_itself). Then it made highlighting go absolutely haywire. After struggling for a few hrs, I realized that in the Zombie class, tile_info was not changed to tile_itself, which is weird honestly. Back to highlighting and vision, I optimized rendering to my fullest ability, having to add many edge cases after. This did not really help the lag that much, and the biggest optimization I can make will probably be in the determine light levels. I will have to pre-compute every ray (meaning that I'll add another two more for loops inside the_pattern_forge yay!!!!!!!). I'll report on that when it's done." />
+    <MESSAGE value="Ok well I was lying when I said highlighting and vision was fixed. So basically what I did was enable player to look orthogonally whenever player held weapon. That's how I figured out that my enemy highlighting is very botched (only specifically when I change vision direction) meaning that enemy highlight doesn't get restored when I look away then look back. I also made enemy subclasses! (check the zombie class). Funny thing is, I refactored tile_info to tile_itself (cuz I like it when it goes player.tile_itself). Then it made highlighting go absolutely haywire. After struggling for a few hrs, I realized that in the Zombie class, tile_info was not changed to tile_itself, which is weird honestly. Back to highlighting and vision, I optimized rendering to my fullest ability, having to add many edge cases after. This did not really help the lag that much, and the biggest optimization I can make will probably be in the determine light levels. I will have to pre-compute every ray (meaning that I'll add another for loop inside the_pattern_forge yay!!!!!!!). I'll report on that when it's done." />
+    <MESSAGE value="Again, I was lying about highlighting and vision. But first, I made enemy subclasses! (check the zombie class). Funny thing is, I refactored tile_info to tile_itself (cuz I like it when it goes player.tile_itself). Then it made highlighting go absolutely haywire. After struggling for a few hrs, I realized that in the Zombie class, tile_info was not changed to tile_itself, which is weird honestly. Back to highlighting and vision, I optimized rendering to my fullest ability, having to add many edge cases after. This did not really help the lag that much, and the biggest optimization I can make will probably be in the determine light levels. I will have to pre-compute every ray (meaning that I'll add another for loop inside the_pattern_forge yay!!!!!!!). I'll report on that when it's done." />
+    <option name="LAST_COMMIT_MESSAGE" value="Again, I was lying about highlighting and vision. But first, I made enemy subclasses! (check the zombie class). Funny thing is, I refactored tile_info to tile_itself (cuz I like it when it goes player.tile_itself). Then it made highlighting go absolutely haywire. After struggling for a few hrs, I realized that in the Zombie class, tile_info was not changed to tile_itself, which is weird honestly. Back to highlighting and vision, I optimized rendering to my fullest ability, having to add many edge cases after. This did not really help the lag that much, and the biggest optimization I can make will probably be in the determine light levels. I will have to pre-compute every ray (meaning that I'll add another for loop inside the_pattern_forge yay!!!!!!!). I'll report on that when it's done." />
   </component>
 </project>

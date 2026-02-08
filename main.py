@@ -312,64 +312,64 @@ class Dungeon:
             self.max_row = 0
             self.max_col = 0
 
-            self.dungeon_text = ''
-            self.set_dungeon_text()
+            self.level_text = ''
+            self.set_level_text()
             self.build_level()
 
-    def set_dungeon_text(self):
+    def set_level_text(self):
         # Max rows: 14
         # Max cols: 11
         self.finished_loading = False
         self.lowest_light_level_in_current_level = 0
         match self.level:
             case -9999:
-                self.dungeon_text = ("wwwwwwwwwwwww\n"
-                                     "woooooooooooo\n"
-                                     "wpoooooowoooo\n"
-                                     "wooowooooooow\n"
-                                     "wooooooooooow\n"
-                                     "woooooooooooo\n"
-                                     "woooooooooooo\n"
-                                     "woooooooooooo\n"
-                                     "woooooooooooo\n"
-                                     "woooooooooooo\n"
-                                     "wwwwwwwwwwwww")
+                self.level_text = ("wwwwwwwwwwwww\n"
+                                   "woooooooooooo\n"
+                                   "wpoooooowoooo\n"
+                                   "wooowooooooow\n"
+                                   "wooooooooooow\n"
+                                   "woooooooooooo\n"
+                                   "woooooooooooo\n"
+                                   "woooooooooooo\n"
+                                   "woooooooooooo\n"
+                                   "woooooooooooo\n"
+                                   "wwwwwwwwwwwww")
             case -2:
-                self.dungeon_text = ("wwwwwwwwwwwwwwww\n"
-                                     "woooooooooooooow\n"
-                                     "wooooooowoooooow\n"
-                                     "wooowooooozowoow\n"
-                                     "woop⸸ooooooowoow\n"
-                                     "woooooooooooooow\n"
-                                     "wwwwwwwwwwwwwwww")
+                self.level_text = ("wwwwwwwwwwwwwwww\n"
+                                   "woooooooooooooow\n"
+                                   "wooooooowoooooow\n"
+                                   "wooowooooozowoow\n"
+                                   "woop⸸ooooooowoow\n"
+                                   "woooooooooooooow\n"
+                                   "wwwwwwwwwwwwwwww")
             case 0:
-                self.dungeon_text = ("wwwwwwwwwwwww\n"
-                                     "woooooooooooe\n"
-                                     "wwbwwwowwwoww\n"
-                                     "wooowooowooow\n"
-                                     "wopowooowooow\n"
-                                     "wo⚷owooowooow\n"
-                                     "wwwwwwwwwwwww")
+                self.level_text = ("wwwwwwwwwwwww\n"
+                                   "woooooooooooe\n"
+                                   "wwbwwwowwwoww\n"
+                                   "wooowooowooow\n"
+                                   "wopowooowooow\n"
+                                   "wo⚷owooowooow\n"
+                                   "wwwwwwwwwwwww")
             case 1:
                 if not game.testing:
                     player.current_vision_pattern = 'player_vision_ver_2'
-                self.dungeon_text = ("wwwwwwwwwwwwwww\n"
-                                     "wwwwwwwpwwwwwww\n"
-                                     "woooooo⸸oooooow\n"
-                                     "wwowowwbwwwowww\n"
-                                     "wwooowwewwwooow\n"
-                                     "woowwwwwwwwowow\n"
-                                     "wowwoooooooowow\n"
-                                     "wowwwwwwowwozow\n"
-                                     "wowoooowowwwoww\n"
-                                     "wooowwoooooo⚷ww\n"
-                                     "wwwwwwwwwwwwwww")
+                self.level_text = ("wwwwwwwwwwwwwww\n"
+                                   "wwwwwwwpwwwwwww\n"
+                                   "woooooo⸸oooooow\n"
+                                   "wwzwowwbwwwowww\n"
+                                   "wwooowwewwwooow\n"
+                                   "woowwwwwwwwowow\n"
+                                   "wowwoooooooowow\n"
+                                   "wowwwwwwowwooow\n"
+                                   "wowoooowowwwoww\n"
+                                   "wooowwoooooo⚷ww\n"
+                                   "wwwwwwwwwwwwwww")
             case 2:
-                self.dungeon_text = ("wwwwwwwwwwww\n"
-                                     "p⸸oooowwwwww\n"
-                                     "woocoooozooe\n"
-                                     "wooooowwwwww\n"
-                                     "wwwwwwwwwwww")
+                self.level_text = ("wwwwwwwwwwww\n"
+                                   "p⸸oooowwwwww\n"
+                                   "woocoooozooe\n"
+                                   "wooooowwwwww\n"
+                                   "wwwwwwwwwwww")
             case _:
                 window.destroy()
 
@@ -386,7 +386,7 @@ class Dungeon:
         self.max_col = 0
         enemy_idx = 0
 
-        for ch in self.dungeon_text:
+        for ch in self.level_text:
             if ch == '\n':
                 row += 1
                 col = 0
@@ -457,7 +457,7 @@ class Dungeon:
             frame.destroy()
             btn.destroy()
 
-        self.set_dungeon_text()
+        self.set_level_text()
         self.build_level()
         player.init_every_level()
         dungeon.locate_important_objects_and_entities()
@@ -491,7 +491,7 @@ class Inventory:
     def pick_up_item(self, item):
         for i, slot in self.inventory.items():
             if slot[get_btn]['text'] == ' ':
-                print('item picked up')
+                #print('item picked up')
                 slot[get_btn].config(text=item)
                 game.update_log('item picked up', item)
                 self.influence_player_highlight()
@@ -500,7 +500,7 @@ class Inventory:
     def destroy_item(self, item):
         for i, slot in self.inventory.items():
             if slot[get_btn]['text'] == item:
-                print('item destroyed')
+                #print('item destroyed')
                 slot[get_btn].config(text=' ')
                 break
 
@@ -561,11 +561,11 @@ class Player:
         if not game.testing:
             self.current_vision_pattern = "player_vision_ver_1"
         else:
-            self.current_vision_pattern = "player_vision_ver_2"
+            self.current_vision_pattern = "player_vision_ver_4"
 
         self.max_hp = 15
         self.hp = self.max_hp
-        self.speed = 5
+        self.action_bar_fill_per_tick = 4
         self.damage = 1
 
         self.highlighting_diagonally_adjacent_tile = False  # an entity can only attack diagonals
@@ -641,9 +641,7 @@ class Player:
                 return
 
         self.prev_highlighted_tile = self.highlighted_tile[:]
-        print(f'surely prev: {self.prev_highlighted_tile}')
         self.highlighted_tile = dungeon.tiles_indexed_by_coords[tuple(self.highlighted_coords)]
-        print(f'surely rn: {self.highlighted_tile}')
 
     def force_diagonal_highlight_direction(self):
         self.prev_highlight_direction = self.highlight_direction
@@ -662,21 +660,22 @@ class Player:
         highlight_tile[get_frame].configure(bg=self.highlight_color)
 
     def interact(self):
-        print('interaction')
+        #('interaction')
         interacted_tile = dungeon.tiles_indexed_by_coords[tuple(self.highlighted_coords)]
         if self.rendered_light_levels[tuple(interacted_tile)] != 0:
             interacted_btn = interacted_tile[get_btn]
             interacted_spot = interacted_btn['text']
-            print(f'interacted_spot: {interacted_spot}')
+            #print(f'interacted_spot: {interacted_spot}')
             if interacted_spot == game.chest:
-                print('chest interaction')
+                pass
+                #print('chest interaction')
                 #chest.open(self.btn_highlighted_coords)
             elif (interacted_spot == game.bars or interacted_spot == game.door) and inv.selected_item_slot[get_btn]['text'] == game.key:
-                print('bars interaction')
+                #print('bars interaction')
                 interacted_btn.config(text=' ')
                 inv.destroy_item(game.key)
             elif interacted_spot == game.exit:
-                print('exited room')
+                #print('exited room')
                 dungeon.next_level()
             elif interacted_spot in game.interactable_singular_items:
                 for item in game.interactable_singular_items:
@@ -688,7 +687,7 @@ class Player:
                     if enemy.tile_itself == interacted_tile:
                         Combat(attacker=self, attacked=enemy)
 
-            game.advance_turn()
+            #game.advance_turn()
 
     def parse_key_press(self, key):
 
@@ -709,6 +708,7 @@ class Player:
                 self.changed_location = False
             else:
                 self.changed_location = True
+                self.tile_itself = dungeon.tiles_indexed_by_coords[tuple(self.coords)]
 
             if '_' in self.highlight_direction:
                 self.attack_mode = True
@@ -898,6 +898,7 @@ class Enemy:
         self.hp = max_hp
         self.max_hp = max_hp
         self.movement_length = movement_length
+        self.action_bar_fill_per_tick = 2
 
         self.state = 'idle'
         self.prev_state = 'idle'
@@ -920,13 +921,9 @@ class Enemy:
 
     def can_see_player(self):
         self.determine_vision_direction()
-        self.rendered_light_levels = self.determine_light_levels_of_tiles()
-        for (frame, btn), light_level in self.rendered_light_levels.items():
-            if light_level == 0:
-                continue
-            if btn['text'] == game.player:
-                return True
-        return False
+        current_light_levels = self.determine_light_levels_of_tiles()
+        #print(self.actual_vision_direction)
+        return player.tile_itself in current_light_levels
 
     def is_orthogonally_adjacent_to_player(self):
         enemy_row, enemy_col = self.coords
@@ -1017,7 +1014,7 @@ class Enemy:
     def steps_to_highlight_button(self):
 
         self.check_self_visibility_and_highlight_status()
-        print(f'is enemy visible to player: {self.is_visible_to_player}')
+        #print(f'is enemy visible to player: {self.is_visible_to_player}')
 
         self.determine_highlighted_button()
 
@@ -1084,7 +1081,8 @@ class Enemy:
         for i, enemy in dungeon.current_enemies.items():
             if enemy.coords == self.coords:
                 highlighted_tile = dungeon.tiles_indexed_by_coords[tuple(self.highlighted_coords)]
-                highlighted_tile[get_frame].configure(bg=game.lighting_colors[player.rendered_light_levels[tuple(highlighted_tile)]])
+                highlighted_tile[get_frame].configure(
+                    bg=game.lighting_colors[player.rendered_light_levels[tuple(highlighted_tile)]])
                 del dungeon.current_enemies[i]
                 break
 
@@ -1094,7 +1092,7 @@ class Zombie(Enemy):
         super().__init__(enemy_type, row, col, max_hp, vision_range, movement_length, vision_pattern_type)
 
         #zombie specific vars
-        self.turns_moving_in_same_direction = 2
+        self.turns_moving_in_same_direction = 0
         self.max_turns_moving_in_same_direction = 2
         self.damage = 1
 
@@ -1105,24 +1103,22 @@ class Zombie(Enemy):
         self.prev_state = self.state
         self.prev_saw_player = self.sees_player
         self.sees_player = self.can_see_player()
-        print(f'can enemy see player: {self.sees_player}')
-        if not self.sees_player and (self.prev_saw_player or self.prev_prev_state == 'pursuit') and (
-                self.prev_state == 'aggro' or self.prev_state == 'freeze') and not self.is_diagonally_adjacent_to_player():
+        #print(f'can enemy see player: {self.sees_player}')
+        if self.prev_state != 'freeze':
+            self.state = 'freeze'
+        elif self.is_diagonally_adjacent_to_player() and self.prev_state == 'freeze':
+            self.state = 'attack'
+        elif not self.sees_player and (self.prev_saw_player or self.prev_prev_state == 'pursuit') and (
+                self.prev_state == 'aggro' or self.prev_state == 'freeze'):
             self.state = 'pursuit'
         else:
-            if self.prev_state == 'freeze':
-                if self.is_diagonally_adjacent_to_player():
-                    self.state = 'attack'
-                else:
-                    if self.sees_player:
-                        self.state = 'aggro'
-                    else:
-                        if self.prev_state != 'pursuit':
-                            self.state = 'idle'
-            elif self.prev_state != 'freeze':
-                self.state = 'freeze'
+            if self.sees_player:
+                self.state = 'aggro'
+            else:
+                if self.prev_state != 'pursuit':
+                    self.state = 'idle'
 
-        print(f'state: {self.state}')
+        #print(f'state: {self.state}')
 
     def prepare_action(self):
         self.update_state()
@@ -1197,7 +1193,7 @@ class Combat:
             attacked.kill_self()
 
 
-class Chest:
+"""class Chest:
     def __init__(self):
         self.chests_in_level = {}
         self.figure_out_their_locations()
@@ -1223,12 +1219,13 @@ class Chest:
             dungeon.tiles[btn_index][get_btn].config(fg='maroon')
 
             # Gets specific item/s from contents of all chest dict first
-            print(self.contents_all_chests[dungeon.level])
+            #print(self.contents_all_chests[dungeon.level])
             for item in self.contents_all_chests[dungeon.level]:
                 inv.pick_up_item(item)
         except ValueError:
-            print('chest looted')
-            # print(f"Inventory slot {index}: {inv.inventory[index]['text']}\nButton: {inv.inventory[index]}")
+            pass
+            #print('chest looted')
+            # print(f"Inventory slot {index}: {inv.inventory[index]['text']}\nButton: {inv.inventory[index]}")"""
 
 
 class VisionPatternCreator:
@@ -1273,7 +1270,7 @@ class VisionPatternCreator:
     def create_enemy_vision_patterns(self):
         self.vision_range = 4
         self.the_pattern_forge('zombie_vision', 5)
-        print(self.patterns[f'zombie_vision'])
+        #print(self.patterns[f'zombie_vision'])
 
 
 game = GameController()
@@ -1302,6 +1299,6 @@ def take_keyboard_input(event):
 window.bind('<KeyPress>', take_keyboard_input)
 # noinspection PyTypeChecker
 window.after(50, lambda: window.focus_force())
-print(inv.inventory[0][get_btn].winfo_reqwidth())
-print(inv.inventory[0][get_btn].winfo_reqheight())
+#print(inv.inventory[0][get_btn].winfo_reqwidth())
+#print(inv.inventory[0][get_btn].winfo_reqheight())
 window.mainloop()
