@@ -557,13 +557,12 @@ class Player:
 
         self.highlight_color = game.default_highlight_color
         self.changed_location = False
-        self.player_info = {'hp': 10, 'max_hp': 10, 'speed': 5}
         if not game.testing:
             self.current_vision_pattern = "player_vision_ver_1"
         else:
             self.current_vision_pattern = "player_vision_ver_4"
 
-        self.max_hp = 15
+        self.max_hp = 10
         self.hp = self.max_hp
         self.action_bar_fill_per_tick = 4
         self.damage = 1
@@ -703,6 +702,7 @@ class Player:
                     movement_direction = 'right'
 
             self.prev_coords = self.coords.copy()
+            game.advance_turn()
             self.coords = dungeon.find_new_location(game.player, self.coords, self.prev_coords, movement_direction)
             if self.prev_coords == self.coords:
                 self.changed_location = False
@@ -720,7 +720,6 @@ class Player:
             if self.changed_location:
                 self.render_vision()
                 self.determine_highlighted_button()
-                game.advance_turn()
                 self.apply_highlight_to_button()
 
         elif key in 'uiojklm' or key in ['comma', 'period']:

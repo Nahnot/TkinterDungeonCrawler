@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="Again, I was lying about highlighting and vision. But first, I made enemy subclasses! (check the zombie class). Funny thing is, I refactored tile_info to tile_itself (cuz I like it when it goes player.tile_itself). Then it made highlighting go absolutely haywire. After struggling for a few hrs, I realized that in the Zombie class, tile_info was not changed to tile_itself, which is weird honestly. Back to highlighting and vision, I optimized rendering to my fullest ability, having to add many edge cases after. This did not really help the lag that much, and the biggest optimization I can make will probably be in the determine light levels. I will have to pre-compute every ray (meaning that I'll add another for loop inside the_pattern_forge yay!!!!!!!). I'll report on that when it's done.">
+    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="Merge remote-tracking branch 'TkinterDungeonCrawler/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;main.py">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
@@ -61,21 +61,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;Python.main.executor&quot;: &quot;PROFILE_LINES&quot;,
-    &quot;Python.pyinstall.executor&quot;: &quot;Run&quot;,
-    &quot;Python.testers.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/rizfc/PycharmProjects/TkinterDungeonCrawler&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.main.executor": "Run",
+    "Python.pyinstall.executor": "Run",
+    "Python.testers.executor": "Run",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/Users/rizfc/PycharmProjects/TkinterDungeonCrawler",
+    "settings.editor.selected.configurable": "preferences.pluginManager"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
@@ -247,7 +247,23 @@
       <option name="project" value="LOCAL" />
       <updated>1769920233871</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="Commit but idk what I changed">
+      <option name="closed" value="true" />
+      <created>1770519661621</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1770519661621</updated>
+    </task>
+    <task id="LOCAL-00017" summary="Merge remote-tracking branch 'TkinterDungeonCrawler/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;main.py">
+      <option name="closed" value="true" />
+      <created>1770519719579</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1770519719579</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -263,7 +279,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Oh dear. I uhhhh fixed enemy vision and highlighting (changed a ton actually). I also finally fixed the zombie AI yay. Next up is refining combat then adding sound patterns." />
-    <MESSAGE value="Merge remote-tracking branch 'TkinterDungeonCrawler/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;main.py" />
     <MESSAGE value="Merge remote-tracking branch 'TkinterDungeonCrawler/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;main.py&#10;&#10;Ok I actually actually actually fixed vision and highlighting. Optimized it too, while I was at it. Only configures tiles in new_light_levels and newly darkened tiles. Hopefully this is it for lighting. Next thing is making the enemy class have children class like zombie, rat, etc." />
     <MESSAGE value="Merge remote-tracking branch 'TkinterDungeonCrawler/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml" />
     <MESSAGE value="Ok I actually actually actually fixed vision and highlighting. Optimized it too, while I was at it. Only configures tiles in new_light_levels and newly darkened tiles. Hopefully this is it for lighting. Next thing is making the enemy class have children class like zombie, rat, etc." />
@@ -271,6 +286,8 @@
     <MESSAGE value="Ok well I was lying when I said highlighting and vision was fixed. So basically what I did was enable player to look orthogonally whenever player held weapon. That's how I figured out that my enemy highlighting is very botched (only specifically when I change vision direction) meaning that enemy highlight doesn't get restored when I look away then look back. I also made enemy subclasses! (check the zombie class). Funny thing is, I refactored tile_info to tile_itself (cuz I like it when it goes player.tile_itself). Then it made highlighting go absolutely haywire. After struggling for a few hrs, I realized that in the Zombie class, tile_info was not changed to tile_itself, which is weird honestly. Back to highlighting and vision, I optimized rendering to my fullest ability, having to add many edge cases after. This did not really help the lag that much, and the biggest optimization I can make will probably be in the determine light levels. I will have to pre-compute every ray (meaning that I'll add another two more for loops inside the_pattern_forge yay!!!!!!!). I'll report on that when it's done." />
     <MESSAGE value="Ok well I was lying when I said highlighting and vision was fixed. So basically what I did was enable player to look orthogonally whenever player held weapon. That's how I figured out that my enemy highlighting is very botched (only specifically when I change vision direction) meaning that enemy highlight doesn't get restored when I look away then look back. I also made enemy subclasses! (check the zombie class). Funny thing is, I refactored tile_info to tile_itself (cuz I like it when it goes player.tile_itself). Then it made highlighting go absolutely haywire. After struggling for a few hrs, I realized that in the Zombie class, tile_info was not changed to tile_itself, which is weird honestly. Back to highlighting and vision, I optimized rendering to my fullest ability, having to add many edge cases after. This did not really help the lag that much, and the biggest optimization I can make will probably be in the determine light levels. I will have to pre-compute every ray (meaning that I'll add another for loop inside the_pattern_forge yay!!!!!!!). I'll report on that when it's done." />
     <MESSAGE value="Again, I was lying about highlighting and vision. But first, I made enemy subclasses! (check the zombie class). Funny thing is, I refactored tile_info to tile_itself (cuz I like it when it goes player.tile_itself). Then it made highlighting go absolutely haywire. After struggling for a few hrs, I realized that in the Zombie class, tile_info was not changed to tile_itself, which is weird honestly. Back to highlighting and vision, I optimized rendering to my fullest ability, having to add many edge cases after. This did not really help the lag that much, and the biggest optimization I can make will probably be in the determine light levels. I will have to pre-compute every ray (meaning that I'll add another for loop inside the_pattern_forge yay!!!!!!!). I'll report on that when it's done." />
-    <option name="LAST_COMMIT_MESSAGE" value="Again, I was lying about highlighting and vision. But first, I made enemy subclasses! (check the zombie class). Funny thing is, I refactored tile_info to tile_itself (cuz I like it when it goes player.tile_itself). Then it made highlighting go absolutely haywire. After struggling for a few hrs, I realized that in the Zombie class, tile_info was not changed to tile_itself, which is weird honestly. Back to highlighting and vision, I optimized rendering to my fullest ability, having to add many edge cases after. This did not really help the lag that much, and the biggest optimization I can make will probably be in the determine light levels. I will have to pre-compute every ray (meaning that I'll add another for loop inside the_pattern_forge yay!!!!!!!). I'll report on that when it's done." />
+    <MESSAGE value="Commit but idk what I changed" />
+    <MESSAGE value="Merge remote-tracking branch 'TkinterDungeonCrawler/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;main.py" />
+    <option name="LAST_COMMIT_MESSAGE" value="Merge remote-tracking branch 'TkinterDungeonCrawler/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;main.py" />
   </component>
 </project>
