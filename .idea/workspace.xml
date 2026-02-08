@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="Merge remote-tracking branch 'TkinterDungeonCrawler/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;main.py">
+    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="Removed player info dict and changed player max hp to 10">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
@@ -263,7 +263,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770519719579</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="Removed player info dict and changed player max hp to 10">
+      <option name="closed" value="true" />
+      <created>1770522082960</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1770522082960</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -288,6 +296,7 @@
     <MESSAGE value="Again, I was lying about highlighting and vision. But first, I made enemy subclasses! (check the zombie class). Funny thing is, I refactored tile_info to tile_itself (cuz I like it when it goes player.tile_itself). Then it made highlighting go absolutely haywire. After struggling for a few hrs, I realized that in the Zombie class, tile_info was not changed to tile_itself, which is weird honestly. Back to highlighting and vision, I optimized rendering to my fullest ability, having to add many edge cases after. This did not really help the lag that much, and the biggest optimization I can make will probably be in the determine light levels. I will have to pre-compute every ray (meaning that I'll add another for loop inside the_pattern_forge yay!!!!!!!). I'll report on that when it's done." />
     <MESSAGE value="Commit but idk what I changed" />
     <MESSAGE value="Merge remote-tracking branch 'TkinterDungeonCrawler/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;main.py" />
-    <option name="LAST_COMMIT_MESSAGE" value="Merge remote-tracking branch 'TkinterDungeonCrawler/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;main.py" />
+    <MESSAGE value="Removed player info dict and changed player max hp to 10" />
+    <option name="LAST_COMMIT_MESSAGE" value="Removed player info dict and changed player max hp to 10" />
   </component>
 </project>

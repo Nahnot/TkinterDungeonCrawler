@@ -447,7 +447,7 @@ class Dungeon:
     def locate_important_objects_and_entities(self):
         for i, (enemy_type, row, col) in self.current_enemies.items():
             if enemy_type == game.zombie:
-                self.current_enemies[i] = Zombie(enemy_type, row, col, 10, 4, 1, 'zombie_vision')
+                self.current_enemies[i] = Zombie(enemy_type, row, col)
         self.finished_loading = True
 
     def next_level(self):
@@ -564,7 +564,6 @@ class Player:
 
         self.max_hp = 10
         self.hp = self.max_hp
-        self.action_bar_fill_per_tick = 4
         self.damage = 1
 
         self.highlighting_diagonally_adjacent_tile = False  # an entity can only attack diagonals
@@ -882,7 +881,7 @@ class Player:
 
 
 class Enemy:
-    def __init__(self, enemy_type, row, col, max_hp, vision_range, movement_length, vision_pattern_type):
+    def __init__(self, enemy_type, row, col):
         self.coords = [row, col]
         self.prev_coords = self.coords.copy()
         self.tile_itself = dungeon.tiles_indexed_by_coords[tuple(self.coords.copy())]
@@ -894,10 +893,6 @@ class Enemy:
         self.highlighted_tile = dungeon.tiles_indexed_by_coords[tuple(self.highlighted_coords)]
 
         self.enemy_type = enemy_type
-        self.hp = max_hp
-        self.max_hp = max_hp
-        self.movement_length = movement_length
-        self.action_bar_fill_per_tick = 2
 
         self.state = 'idle'
         self.prev_state = 'idle'
@@ -910,13 +905,11 @@ class Enemy:
         self.actual_vision_direction = 'right'
         self.prev_actual_vision_direction = 'right'
 
-        self.vision_range = vision_range
         self.is_visible_to_player = False
         self.sees_player = False
         self.prev_saw_player = False
 
         self.rendered_light_levels = {}
-        self.vision_pattern_type = vision_pattern_type
 
     def can_see_player(self):
         self.determine_vision_direction()
@@ -1040,6 +1033,7 @@ class Enemy:
 
         enemy_row, enemy_col = self.coords
         vision_pattern = vision.patterns[self.vision_pattern_type][self.actual_vision_direction]
+        print(self.vision_pattern_type)
 
         def has_wall_at(row, col):
             h_tile = dungeon.tiles_indexed_by_coords.get((row, col))
@@ -1087,13 +1081,21 @@ class Enemy:
 
 
 class Zombie(Enemy):
-    def __init__(self, enemy_type, row, col, max_hp, vision_range, movement_length, vision_pattern_type):
-        super().__init__(enemy_type, row, col, max_hp, vision_range, movement_length, vision_pattern_type)
+    def __init__(self, enemy_type, row, col):
+        self.max_hp = 10
+        self.hp = self.max_hp
+        self.vision_range = 4
+        self.movement_length = 1
+        self.damage = 1
+
+        self.vision_pattern_type = 'zombie_vision'
+
+        self.parent = Enemy(enemy_type, row, col)
+        super().__init__(enemy_type, row, col)
 
         #zombie specific vars
         self.turns_moving_in_same_direction = 0
         self.max_turns_moving_in_same_direction = 2
-        self.damage = 1
 
         self.prepare_action()
 
