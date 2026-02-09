@@ -255,14 +255,18 @@ class GameController:
 
         return btn
 
-    def advance_turn(self):
-        if self.turn == 'player':
-            self.turn = 'enemy'
-            #print(f'player coords while advancing turn: {player.coords}')
-            for enemy in dungeon.current_enemies.values():
-                enemy.action()
-                enemy.prepare_action()
-            self.turn = 'player'
+    @staticmethod
+    def advance_turn(player_action):
+        for entity, speed in dungeon.speed_of_current_entities.items():
+            if entity == player:
+                match player_action:
+                    case 'movement':
+                        player.steps_to_take_after_pressing_wasd()
+                    case 'interaction':
+                        player.interact()
+            else:
+                entity.action()
+                entity.prepare_action()
 
     def make_log(self):
         self.game_log = tk.scrolledtext.ScrolledText(log_frame,
@@ -303,6 +307,11 @@ class Dungeon:
         self.lowest_light_level_in_current_level = 0
 
         self.current_enemies = {}
+
+        self.current_entities = {}
+        self.speed_of_current_entities = {}
+        # The speed is now in descending order, meaning that higher speed entities have a higher index, meaning they go first
+        self.ordered_speed_of_current_entities = {}
 
         # Rendering/structures
         if True:
@@ -448,7 +457,11 @@ class Dungeon:
         for i, (enemy_type, row, col) in self.current_enemies.items():
             if enemy_type == game.zombie:
                 self.current_enemies[i] = Zombie(enemy_type, row, col)
+                self.current_entities[i] = self.current_enemies[i]
+                self.speed_of_current_entities[self.current_enemies[i]] = self.current_enemies[i].speed
         self.finished_loading = True
+        dungeon.ordered_speed_of_current_entities = {key: val for key, val in sorted(dungeon.speed_of_current_entities.items(), key=lambda item: item[1], reverse=True)}
+        print(dungeon.ordered_speed_of_current_entities)
 
     def next_level(self):
         self.level += 1
@@ -560,10 +573,11 @@ class Player:
         if not game.testing:
             self.current_vision_pattern = "player_vision_ver_1"
         else:
-            self.current_vision_pattern = "player_vision_ver_4"
+            self.current_vision_pattern = "player_vision_ver_2"
 
         self.max_hp = 10
         self.hp = self.max_hp
+        self.speed = 10
         self.damage = 1
 
         self.highlighting_diagonally_adjacent_tile = False  # an entity can only attack diagonals
@@ -578,6 +592,9 @@ class Player:
             if btn['text'] == game.player:
                 self.coords = list(coords)
                 self.tile_itself = (frame, btn)
+
+        dungeon.current_entities[len(dungeon.current_entities)] = self
+        dungeon.speed_of_current_entities[self] = self.speed
         self.prev_coords = self.coords.copy()
         self.highlighted_coords = self.coords.copy()
         self.highlighted_tile = dungeon.tiles_indexed_by_coords[tuple(self.coords)]
@@ -654,8 +671,10 @@ class Player:
                 self.highlight_direction = 'down_left'
 
     def apply_highlight_to_button(self):
-        highlight_tile = dungeon.tiles_indexed_by_coords[tuple(self.highlighted_coords)]
-        highlight_tile[get_frame].configure(bg=self.highlight_color)
+        self.highlighted_tile[get_frame].configure(bg=self.highlight_color)
+
+    def erase_highlight_from_prev_btn(self):
+        self.prev_highlighted_tile[get_frame].configure(bg=self.rendered_light_levels[self.prev_highlighted_tile])
 
     def interact(self):
         #('interaction')
@@ -680,46 +699,25 @@ class Player:
                     if item == interacted_spot:
                         inv.pick_up_item(item)
                         interacted_btn.config(text=' ')
-            elif interacted_spot in game.enemies and inv.weapon_selected and self.attack_mode:
+            elif interacted_spot in game.enemies and self.attack_mode:
                 for enemy in dungeon.current_enemies.values():
                     if enemy.tile_itself == interacted_tile:
                         Combat(attacker=self, attacked=enemy)
-
-            #game.advance_turn()
 
     def parse_key_press(self, key):
 
         if key in ['w', 'a', 's', 'd']:
             match key:
                 case 'w':
-                    movement_direction = 'up'
+                    self.movement_direction = 'up'
                 case 'a':
-                    movement_direction = 'left'
+                    self.movement_direction = 'left'
                 case 's':
-                    movement_direction = 'down'
+                    self.movement_direction = 'down'
                 case 'd':
-                    movement_direction = 'right'
+                    self.movement_direction = 'right'
 
-            self.prev_coords = self.coords.copy()
-            game.advance_turn()
-            self.coords = dungeon.find_new_location(game.player, self.coords, self.prev_coords, movement_direction)
-            if self.prev_coords == self.coords:
-                self.changed_location = False
-            else:
-                self.changed_location = True
-                self.tile_itself = dungeon.tiles_indexed_by_coords[tuple(self.coords)]
-
-            if '_' in self.highlight_direction:
-                self.attack_mode = True
-            else:
-                self.attack_mode = False
-
-            if not self.change_vision:
-                self.change_vision = True
-            if self.changed_location:
-                self.render_vision()
-                self.determine_highlighted_button()
-                self.apply_highlight_to_button()
+            game.advance_turn('movement')
 
         elif key in 'uiojklm' or key in ['comma', 'period']:
             self.prev_highlight_direction = self.highlight_direction
@@ -740,27 +738,53 @@ class Player:
                     self.highlight_direction = 'down'
                 case 'period':
                     self.highlight_direction = 'down_right'
-            if '_' in self.highlight_direction:
-                self.attack_mode = True
-            else:
-                self.attack_mode = False
-            self.determine_vision_direction()
-            self.change_vision = False
-            if self.prev_vision_direction != self.vision_direction:
-                self.change_vision = True
-            self.render_vision()
-            if self.prev_highlight_direction != self.highlight_direction:
-                self.determine_highlighted_button()
-            for enemy in dungeon.current_enemies.values():
-                enemy.steps_to_highlight_button()
-
-            if self.prev_highlight_direction != self.highlight_direction:
-                self.apply_highlight_to_button()
+            self.steps_to_take_after_pressing_looking_keys()
 
         elif key == 'space':
-            self.interact()
+            game.advance_turn('interaction')
         elif key in '0123456789':
             inv.register_inventory_number(key)
+
+    def steps_to_take_after_pressing_wasd(self):
+        self.prev_coords = self.coords.copy()
+        self.coords = dungeon.find_new_location(game.player, self.coords, self.prev_coords, self.movement_direction)
+        if self.prev_coords == self.coords:
+            self.changed_location = False
+        else:
+            self.changed_location = True
+            self.tile_itself = dungeon.tiles_indexed_by_coords[tuple(self.coords)]
+
+        if '_' in self.highlight_direction and inv.weapon_selected:
+            self.attack_mode = True
+        else:
+            self.attack_mode = False
+
+        if not self.change_vision:
+            self.change_vision = True
+        if self.changed_location:
+            self.render_vision()
+            self.determine_highlighted_button()
+            self.erase_highlight_from_prev_btn()
+            self.apply_highlight_to_button()
+
+    def steps_to_take_after_pressing_looking_keys(self):
+        if '_' in self.highlight_direction:
+            self.attack_mode = True
+        else:
+            self.attack_mode = False
+        self.determine_vision_direction()
+        self.change_vision = False
+        if self.prev_vision_direction != self.vision_direction:
+            self.change_vision = True
+        self.render_vision()
+        if self.prev_highlight_direction != self.highlight_direction:
+            self.determine_highlighted_button()
+        for enemy in dungeon.current_enemies.values():
+            enemy.steps_to_highlight_button()
+
+        if self.prev_highlight_direction != self.highlight_direction:
+            self.erase_highlight_from_prev_btn()
+            self.apply_highlight_to_button()
 
     def determine_light_levels_of_tiles(self):
 
@@ -849,32 +873,6 @@ class Player:
                     btn.configure(bg=tile_color, fg='black')
 
                     self.rendered_light_levels[(frame, btn)] = 0
-
-        if dungeon.finished_loading:
-            if self.rendered_light_levels[self.highlighted_tile] == self.prev_rendered_light_levels[self.highlighted_tile]:
-                frame, btn = self.highlighted_tile
-                light_level = self.rendered_light_levels[self.highlighted_tile]
-                tile_color = game.lighting_colors[light_level]
-                frame.configure(bg=tile_color)
-                btn.configure(bg=tile_color, fg='black')
-            if not self.change_vision or inv.just_equipped_weapon:
-                frame, btn = self.prev_highlighted_tile
-                tile_color = game.lighting_colors[self.rendered_light_levels[self.prev_highlighted_tile]]
-                frame.configure(bg=tile_color)
-                btn.configure(bg=tile_color, fg='black')
-            for enemy in dungeon.current_enemies.values():
-                if enemy.do_highlight and self.rendered_light_levels[enemy.prev_highlighted_tile] == 0:
-                    frame, btn = enemy.prev_highlighted_tile
-                    light_level = self.rendered_light_levels[enemy.prev_highlighted_tile]
-                    tile_color = game.lighting_colors[light_level]
-                    frame.configure(bg=tile_color)
-                    btn.configure(bg=tile_color, fg='black')
-                elif enemy.highlighted_tile in new_light_levels and self.rendered_light_levels[enemy.highlighted_tile] == new_light_levels[enemy.highlighted_tile]:
-                    frame, btn = enemy.highlighted_tile
-                    light_level = self.rendered_light_levels[enemy.highlighted_tile]
-                    tile_color = game.lighting_colors[light_level]
-                    frame.configure(bg=tile_color)
-                    btn.configure(bg=tile_color, fg='black')
 
     def kill_self(self):
         pass
@@ -1087,6 +1085,7 @@ class Zombie(Enemy):
         self.vision_range = 4
         self.movement_length = 1
         self.damage = 1
+        self.speed = 15
 
         self.vision_pattern_type = 'zombie_vision'
 
