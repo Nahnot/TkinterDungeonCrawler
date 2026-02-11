@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="Simplified enemy subclasses and removed mentions of action bar (a thing I wanted to do). Currently, I am workshopping game.advance_turn to accomodate speed">
+    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="Currently working on making speed actually work!!! Big architectural change: I have brought back erase prev btn highlight (I'm pretty sure I never had a commit with it) and removed the edge cases from render vision because it annoys me. This will be part 1 of the speed changes.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
@@ -279,7 +279,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770522866961</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="Currently working on making speed actually work!!! Big architectural change: I have brought back erase prev btn highlight (I'm pretty sure I never had a commit with it) and removed the edge cases from render vision because it annoys me. This will be part 1 of the speed changes.">
+      <option name="closed" value="true" />
+      <created>1770599380501</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1770599380501</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -306,6 +314,7 @@
     <MESSAGE value="Merge remote-tracking branch 'TkinterDungeonCrawler/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;main.py" />
     <MESSAGE value="Removed player info dict and changed player max hp to 10" />
     <MESSAGE value="Simplified enemy subclasses and removed mentions of action bar (a thing I wanted to do). Currently, I am workshopping game.advance_turn to accomodate speed" />
-    <option name="LAST_COMMIT_MESSAGE" value="Simplified enemy subclasses and removed mentions of action bar (a thing I wanted to do). Currently, I am workshopping game.advance_turn to accomodate speed" />
+    <MESSAGE value="Currently working on making speed actually work!!! Big architectural change: I have brought back erase prev btn highlight (I'm pretty sure I never had a commit with it) and removed the edge cases from render vision because it annoys me. This will be part 1 of the speed changes." />
+    <option name="LAST_COMMIT_MESSAGE" value="Currently working on making speed actually work!!! Big architectural change: I have brought back erase prev btn highlight (I'm pretty sure I never had a commit with it) and removed the edge cases from render vision because it annoys me. This will be part 1 of the speed changes." />
   </component>
 </project>
