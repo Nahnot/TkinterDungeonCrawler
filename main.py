@@ -83,16 +83,11 @@ INVENTORY_BTN_HEIGHT_IN_PIXELS = 83
 
 FRAME_SIZE_GAP = 2
 BTN_PAD = FRAME_SIZE_GAP / 2
-if not macOS:
-    DUNGEON_FRAME_WIDTH = DUNGEON_BTN_WIDTH_IN_PIXELS + FRAME_SIZE_GAP
-    DUNGEON_FRAME_HEIGHT = DUNGEON_BTN_HEIGHT_IN_PIXELS + FRAME_SIZE_GAP
-    INVENTORY_FRAME_WIDTH = INVENTORY_BTN_WIDTH_IN_PIXELS + FRAME_SIZE_GAP
-    INVENTORY_FRAME_HEIGHT = INVENTORY_BTN_HEIGHT_IN_PIXELS + FRAME_SIZE_GAP
-else:
-    DUNGEON_FRAME_WIDTH = DUNGEON_BTN_WIDTH_IN_PIXELS
-    DUNGEON_FRAME_HEIGHT = DUNGEON_BTN_HEIGHT_IN_PIXELS
-    INVENTORY_FRAME_WIDTH = INVENTORY_BTN_WIDTH_IN_PIXELS
-    INVENTORY_FRAME_HEIGHT = INVENTORY_BTN_HEIGHT_IN_PIXELS
+
+DUNGEON_FRAME_WIDTH = DUNGEON_BTN_WIDTH_IN_PIXELS + FRAME_SIZE_GAP
+DUNGEON_FRAME_HEIGHT = DUNGEON_BTN_HEIGHT_IN_PIXELS + FRAME_SIZE_GAP
+INVENTORY_FRAME_WIDTH = INVENTORY_BTN_WIDTH_IN_PIXELS + FRAME_SIZE_GAP
+INVENTORY_FRAME_HEIGHT = INVENTORY_BTN_HEIGHT_IN_PIXELS + FRAME_SIZE_GAP
 direction_map = {
     (-1, -1): 'up_left',
     (-1, 0): 'up',
@@ -102,6 +97,13 @@ direction_map = {
     (1, -1): 'down_left',
     (1, 0): 'down',
     (1, 1): 'down_right',
+}
+
+visible_octants_for_each_direction = {
+    'up': [1, 0, 7, 6],
+    'left': [7, 6, 5, 4],
+    'down': [5, 4, 3, 2],
+    'right': [3, 2, 1, 0]
 }
 
 orthogonal_directions = ['up', 'down', 'left', 'right']
@@ -257,7 +259,7 @@ class GameController:
 
     @staticmethod
     def advance_turn(player_action):
-        for entity, speed in dungeon.speed_of_current_entities.items():
+        for entity, speed in dungeon.ordered_speed_of_current_entities.items():
             if entity == player:
                 match player_action:
                     case 'movement':
@@ -461,7 +463,9 @@ class Dungeon:
                 self.current_enemies[i] = Zombie(enemy_type, row, col)
                 self.current_entities[i] = self.current_enemies[i]
                 self.speed_of_current_entities[self.current_enemies[i]] = self.current_enemies[i].speed
-        dungeon.ordered_speed_of_current_entities = {key: val for key, val in sorted(dungeon.speed_of_current_entities.items(), key=lambda item: item[1], reverse=True)}
+        dungeon.ordered_speed_of_current_entities = {key: val for key, val in
+                                                     sorted(dungeon.speed_of_current_entities.items(),
+                                                            key=lambda item: item[1], reverse=True)}
         print(dungeon.ordered_speed_of_current_entities)
 
     def next_level(self):
@@ -509,6 +513,7 @@ class Inventory:
                 #print('item picked up')
                 slot[get_btn].config(text=item)
                 game.update_log('item picked up', item)
+                self.influence_player_highlight()
                 break
 
     def destroy_item(self, item):
@@ -524,6 +529,8 @@ class Inventory:
 
         self.inventory_highlighting()
 
+        self.influence_player_highlight()
+
     def inventory_highlighting(self):
         if self.prev_selected_item_slot != self.selected_item_slot:
             self.prev_selected_item_slot[get_frame].configure(background=game.default_color)
@@ -538,6 +545,12 @@ class Inventory:
         if num == '0':
             num = '10'
         self.select_item(self.inventory[int(num) - 1])
+
+    def influence_player_highlight(self):
+        if self.selected_item_slot[get_btn]['text'] == game.sword:
+            self.weapon_selected = True
+        else:
+            self.weapon_selected = False
 
 
 class Player:
@@ -559,6 +572,7 @@ class Player:
         self.hp = self.max_hp
         self.speed = 10
         self.damage = 1
+        self.vision_radius = 2
 
         self.highlighting_diagonally_adjacent_tile = False  # an entity can only attack diagonals
         self.attack_mode = False
@@ -601,6 +615,7 @@ class Player:
             self.vision_direction = self.highlight_direction
 
     def determine_highlighted_button(self):
+        print(f'is weap selected?: {inv.weapon_selected} and {self.attack_mode}')
         if inv.weapon_selected and self.attack_mode:
             self.highlight_color = game.attack_color
         else:
@@ -698,8 +713,14 @@ class Player:
                 case 'd':
                     self.movement_direction = 'right'
 
+            if '_' in self.highlight_direction and inv.weapon_selected:
+                self.attack_mode = True
+            else:
+                self.attack_mode = False
+
             self.prev_coords = self.coords.copy()
             self.coords = dungeon.find_new_location(game.player, self.coords, self.prev_coords, self.movement_direction)
+            self.tile_itself = dungeon.tiles_indexed_by_coords[tuple(self.coords)]
             if self.prev_coords == self.coords:
                 self.changed_location = False
             else:
@@ -727,6 +748,11 @@ class Player:
                     self.highlight_direction = 'down'
                 case 'period':
                     self.highlight_direction = 'down_right'
+
+            if '_' in self.highlight_direction:
+                self.attack_mode = True
+            else:
+                self.attack_mode = False
             self.steps_to_take_after_pressing_looking_keys()
 
         elif key == 'space':
@@ -735,14 +761,6 @@ class Player:
             inv.register_inventory_number(key)
 
     def steps_to_take_after_pressing_wasd(self):
-
-        self.tile_itself = dungeon.tiles_indexed_by_coords[tuple(self.coords)]
-
-        if '_' in self.highlight_direction and inv.weapon_selected:
-            self.attack_mode = True
-        else:
-            self.attack_mode = False
-
         if not self.change_vision:
             self.change_vision = True
         dungeon.go_to_new_location(game.player, self.coords, self.prev_coords)
@@ -750,10 +768,7 @@ class Player:
         self.apply_highlight_to_button()
 
     def steps_to_take_after_pressing_looking_keys(self):
-        if '_' in self.highlight_direction:
-            self.attack_mode = True
-        else:
-            self.attack_mode = False
+
         self.determine_vision_direction()
         self.change_vision = False
 
@@ -774,69 +789,32 @@ class Player:
 
     def determine_light_levels_of_tiles(self):
 
-        light_levels_by_tile = {}
+        self.light_levels_by_tile = {}
 
         player_row, player_col = self.coords
-        vision_pattern = vision.patterns[self.current_vision_pattern][self.vision_direction]
 
-        def has_wall_at(row, col):
-            tile = dungeon.tiles_indexed_by_coords.get((row, col))
-            if tile is None:
-                return False
-            return tile[get_btn]['text'] == game.wall
+        self.light_levels_by_tile[self.tile_itself] = self.vision_radius
 
-        for light_level, offsets in vision_pattern.items():
-            for row_offset, col_offset in offsets:
-                target_row = player_row + row_offset
-                target_col = player_col + col_offset
+        # \7|0/
+        # 6\|/1
+        #---|---
+        # 5/|\2
+        # /4|3\
+        for octant in visible_octants_for_each_direction[self.vision_direction]:
+            vision.cast_light_in_octant(self, player_row, player_col, self.vision_radius, octant)
+            print(self.light_levels_by_tile)
 
-                steps = max(abs(row_offset), abs(col_offset))
-                blocked = False
-
-                for step in range(1, steps + 1):
-                    check_row = player_row + round(row_offset * step / steps)
-                    check_col = player_col + round(col_offset * step / steps)
-
-                    if not (abs(row_offset) == abs(col_offset) == steps == 1):
-                        if has_wall_at(check_row, check_col):
-                            # allow the wall tile itself
-                            if step != steps:
-                                blocked = True
-                            break
-                    else:
-                        #wall_row = player_row + row_offset
-                        #wall_col = player_col + col_offset
-
-                        block_row = player_row + row_offset
-                        block_col = player_col
-
-                        block_row_2 = player_row
-                        block_col_2 = player_col + col_offset
-
-                        if has_wall_at(block_row, block_col) and has_wall_at(block_row_2, block_col_2):
-                            blocked = True
-                            break
-
-                if blocked:
-                    continue
-
-                tile = dungeon.tiles_indexed_by_coords.get((target_row, target_col))
-                if tile is None:
-                    continue
-
-                tile_key = tuple(tile)
-                light_levels_by_tile[tile_key] = max(
-                    light_levels_by_tile.get(tile_key, dungeon.lowest_light_level_in_current_level), light_level)
-
-        return light_levels_by_tile
+        return self.light_levels_by_tile
 
     def render_vision(self):
         self.prev_rendered_light_levels = self.rendered_light_levels.copy()
 
         if self.change_vision:
-            new_light_levels = self.determine_light_levels_of_tiles()
+            new_light_levels = self.determine_light_levels_of_tiles().copy()
         else:
             new_light_levels = self.rendered_light_levels
+
+        print(new_light_levels)
 
         if self.change_vision:
             for (frame, btn), old_light_level in self.prev_rendered_light_levels.items():
@@ -886,8 +864,8 @@ class Enemy:
         self.prev_highlight_direction = 'right'
         self.do_highlight = False
 
-        self.actual_vision_direction = 'right'
-        self.prev_actual_vision_direction = 'right'
+        self.vision_direction = 'right'
+        self.prev_vision_direction = 'right'
 
         self.is_visible_to_player = False
         self.prev_visible_to_player = False
@@ -983,7 +961,8 @@ class Enemy:
             frame.configure(bg=self.highlight_color)
 
     def erase_highlight_from_prev_btn(self):
-        if not (self.prev_highlighted_tile == player.prev_highlighted_tile or self.highlighted_tile == player.prev_highlighted_tile or self.prev_highlighted_tile == player.highlighted_tile or self.highlighted_tile == player.highlighted_tile):
+        if not (
+                self.prev_highlighted_tile == player.prev_highlighted_tile or self.highlighted_tile == player.prev_highlighted_tile or self.prev_highlighted_tile == player.highlighted_tile or self.highlighted_tile == player.highlighted_tile):
             light_level = player.rendered_light_levels.get(self.prev_highlighted_tile, 0)
             self.prev_highlighted_tile[get_frame].configure(bg=game.lighting_colors[light_level])
             print(self.prev_coords, player.rendered_light_levels.get(self.prev_highlighted_tile, 0))
@@ -994,7 +973,8 @@ class Enemy:
         #print(f'is enemy visible to player: {self.is_visible_to_player}')
 
         self.determine_highlighted_button()
-        if (self.prev_visible_to_player and not self.is_visible_to_player) or (player.rendered_light_levels[self.prev_highlighted_tile] == 0 and self.is_visible_to_player):
+        if (self.prev_visible_to_player and not self.is_visible_to_player) or (
+                player.rendered_light_levels[self.prev_highlighted_tile] == 0 and self.is_visible_to_player):
             self.erase_highlight_from_prev_btn()
 
         if self.do_highlight:
@@ -1002,58 +982,36 @@ class Enemy:
             self.apply_highlight_to_button()
 
     def determine_vision_direction(self):
-        self.prev_actual_vision_direction = self.actual_vision_direction
-        if '_right' in self.highlight_direction and self.prev_actual_vision_direction == 'left':
-            self.actual_vision_direction = 'right'
-        elif '_left' in self.highlight_direction and self.prev_actual_vision_direction == 'right':
-            self.actual_vision_direction = 'left'
-        elif 'up_' in self.highlight_direction and self.prev_actual_vision_direction == 'down':
-            self.actual_vision_direction = 'up'
-        elif 'down_' in self.highlight_direction and self.prev_actual_vision_direction == 'up':
-            self.actual_vision_direction = 'down'
+        self.prev_vision_direction = self.vision_direction
+        if '_right' in self.highlight_direction and self.prev_vision_direction == 'left':
+            self.vision_direction = 'right'
+        elif '_left' in self.highlight_direction and self.prev_vision_direction == 'right':
+            self.vision_direction = 'left'
+        elif 'up_' in self.highlight_direction and self.prev_vision_direction == 'down':
+            self.vision_direction = 'up'
+        elif 'down_' in self.highlight_direction and self.prev_vision_direction == 'up':
+            self.vision_direction = 'down'
         elif self.highlight_direction in orthogonal_directions:
-            self.actual_vision_direction = self.highlight_direction
+            self.vision_direction = self.highlight_direction
 
     def determine_light_levels_of_tiles(self):
 
-        light_levels_by_tile = {}
+        self.light_levels_by_tile = {}
 
         enemy_row, enemy_col = self.coords
-        vision_pattern = vision.patterns[self.vision_pattern_type][self.actual_vision_direction]
 
-        def has_wall_at(row, col):
-            h_tile = dungeon.tiles_indexed_by_coords.get((row, col))
-            if h_tile is None:
-                return False
-            return h_tile[get_btn]['text'] == game.wall
+        self.light_levels_by_tile[self.tile_itself] = self.vision_radius + 1
 
-        for light_level, offsets in vision_pattern.items():
-            for row_offset, col_offset in offsets:
-                target_row = enemy_row + row_offset
-                target_col = enemy_col + col_offset
+        # \7|0/
+        # 6\|/1
+        #---|---
+        # 5/|\2
+        # /4|3\
+        for octant in visible_octants_for_each_direction[self.vision_direction]:
+            vision.cast_light_in_octant(self, enemy_row, enemy_col, self.vision_radius, octant)
+            print(self.light_levels_by_tile)
 
-                steps = max(abs(row_offset), abs(col_offset))
-                blocked = False
-
-                for step in range(1, steps + 1):
-                    check_row = enemy_row + round(row_offset * step / steps)
-                    check_col = enemy_col + round(col_offset * step / steps)
-
-                    if step != steps and has_wall_at(check_row, check_col):
-                        blocked = True
-                        break
-
-                if blocked:
-                    continue
-
-                tile = dungeon.tiles_indexed_by_coords.get((target_row, target_col))
-                if tile is None:
-                    continue
-
-                tile_key = tuple(tile)
-                light_levels_by_tile[tile_key] = max(light_levels_by_tile.get(tile_key, 0), light_level)
-
-        return light_levels_by_tile
+        return self.light_levels_by_tile
 
     def kill_self(self):
         self.tile_itself[get_btn].config(text=' ')
@@ -1070,10 +1028,10 @@ class Zombie(Enemy):
     def __init__(self, enemy_type, row, col):
         self.max_hp = 10
         self.hp = self.max_hp
-        self.vision_range = 4
+        self.vision_radius = 4
         self.movement_length = 1
         self.damage = 1
-        self.speed = 15
+        self.speed = 5
 
         self.vision_pattern_type = 'zombie_vision'
 
@@ -1134,7 +1092,7 @@ class Zombie(Enemy):
                 self.enemy_type,
                 self.coords,
                 self.prev_coords,
-                self.actual_vision_direction
+                self.vision_direction
             )
             dungeon.go_to_new_location(game.zombie, self.coords, self.prev_coords)
             self.tile_itself = dungeon.tiles_indexed_by_coords[tuple(self.coords)]
@@ -1218,53 +1176,97 @@ class Combat:
             # print(f"Inventory slot {index}: {inv.inventory[index]['text']}\nButton: {inv.inventory[index]}")"""
 
 
-class VisionPatternCreator:
-    def __init__(self):
-        self.patterns = {}
-        self.row_and_col_offset_limits_per_orthogonal_direction_including_peripheral_vision = {
-            'up': (1, 10000),
-            'left': (10000, 1),
-            'down': (-1, 10000),
-            'right': (10000, -1)
-        }
-        self.row_and_col_offset_limits_per_orthogonal_direction_without_peripheral_vision = {
-            'up': (0, 10000),
-            'left': (10000, 0),
-            'down': (0, 10000),
-            'right': (10000, 0)
-        }
-        self.vision_range = 1
-        self.current_row_and_col_limit_dict = self.row_and_col_offset_limits_per_orthogonal_direction_including_peripheral_vision
-        self.create_player_vision_pattern_versions()
-        self.create_enemy_vision_patterns()
+class Shadowcasting:
+    def cast_light_in_octant(self, entity, entity_row, entity_col, radius, octant):
+        shadowed_intervals = []
 
-    def the_pattern_forge(self, vision_pattern, base_light_level):
-        self.patterns[vision_pattern] = {}
-        for direction, (row_offset_limit, col_offset_limit) in self.current_row_and_col_limit_dict.items():
-            current_dict = self.patterns[vision_pattern][direction] = {}
-            for row_offset in range(-self.vision_range, self.vision_range + 1):
-                for col_offset in range(-self.vision_range, self.vision_range + 1):
-                    current_light_level = base_light_level - max(abs(row_offset), abs(col_offset))
-                    if (row_offset < row_offset_limit and direction == 'up') or (
-                            row_offset > row_offset_limit and direction == 'down') or (
-                            col_offset < col_offset_limit and direction == 'left') or (
-                            col_offset > col_offset_limit and direction == 'right') or (row_offset == col_offset == 0):
-                        current_dict.setdefault(current_light_level, []).append((row_offset, col_offset))
+        for depth in range(1, radius + 1):
+            for lateral in range(0, depth + 1):
 
-    def create_player_vision_pattern_versions(self):
-        max_versions = 7
-        for version in range(1, max_versions + 1):
-            self.the_pattern_forge(f'player_vision_ver_{version}', base_light_level=2 + (version - 1))
-            self.vision_range += 1
+                # Slopes for this tile
+                left_slope = (lateral - 0.5) / (depth + 0.5)
+                right_slope = (lateral + 0.5) / (depth - 0.5)
 
-    def create_enemy_vision_patterns(self):
-        self.vision_range = 4
-        self.the_pattern_forge('zombie_vision', 5)
-        #print(self.patterns[f'zombie_vision'])
+                # Check if tile is fully shadowed
+                in_shadow = False
+                for shadow_start, shadow_end in shadowed_intervals:
+                    if shadow_start <= left_slope and right_slope <= shadow_end:
+                        in_shadow = True
+                        break
+
+                if in_shadow:
+                    continue
+
+                tile_row, tile_col = self.transform_octant(
+                    entity_row, entity_col, depth, lateral, octant
+                )
+
+                tile = dungeon.tiles_indexed_by_coords.get((tile_row, tile_col))
+                if tile is None:
+                    continue
+
+                distance = depth
+                if distance <= radius:
+                    light_level = int(radius - distance + 1)
+                    entity.light_levels_by_tile[tile] = max(
+                        entity.light_levels_by_tile.get(tile, 0),
+                        light_level
+                    )
+
+                # If tile blocks light, add a shadow interval
+                if tile[get_btn]["text"] == game.wall:
+                    self._add_shadow(shadowed_intervals, left_slope, right_slope)
+
+            # Early exit: full shadow
+            if shadowed_intervals == [(-1.0, 1.0)]:
+                break
+
+    @staticmethod
+    def _add_shadow(shadows, start, end):
+        new_shadows = []
+        inserted = False
+
+        for s, e in shadows:
+            if e < start:
+                new_shadows.append((s, e))
+            elif end < s:
+                if not inserted:
+                    new_shadows.append((start, end))
+                    inserted = True
+                new_shadows.append((s, e))
+            else:
+                start = min(start, s)
+                end = max(end, e)
+
+        if not inserted:
+            new_shadows.append((start, end))
+
+        shadows.clear()
+        shadows.extend(new_shadows)
+
+    @staticmethod
+    def transform_octant(entity_row, entity_col, depth, lateral, octant):
+        match octant:
+            case 0:  # N
+                return entity_row - depth, entity_col + lateral
+            case 1:  # NE
+                return entity_row - lateral, entity_col + depth
+            case 2:  # E
+                return entity_row + lateral, entity_col + depth
+            case 3:  # SE
+                return entity_row + depth, entity_col + lateral
+            case 4:  # S
+                return entity_row + depth, entity_col - lateral
+            case 5:  # SW
+                return entity_row + lateral, entity_col - depth
+            case 6:  # W
+                return entity_row - lateral, entity_col - depth
+            case 7:  # NW
+                return entity_row - depth, entity_col - lateral
 
 
 game = GameController()
-vision = VisionPatternCreator()
+vision = Shadowcasting()
 dungeon = Dungeon()
 inv = Inventory()
 player = Player()
