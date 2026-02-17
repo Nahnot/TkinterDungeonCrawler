@@ -232,7 +232,7 @@ class GameController:
                 text = self.exit
             case 'b':
                 text = self.bars
-            case '𝘣':
+            case '𝖇':
                 text = self.locked_bars
             case 'k':
                 text = self.key
