@@ -131,8 +131,8 @@ class GameController:
                          '⛓⛓⛓⛓\n'
                          '⛓⛓⛓⛓')
             self.locked_bars = ('⛓⛓⛓⛓\n'
-                                '⛓⛓⛓⛓\n'
                                 '⛓⛓∅⛓\n'
+                                '⛓⛓⛓⛓\n'
                                 '⛓⛓⛓⛓')
             self.exit = '✦'
             self.coin = '¤'
@@ -172,6 +172,9 @@ class GameController:
 
         self.game_log = None
         self.game_log_text = ""
+
+        self.entered_new_level = False
+
         self.make_log()
 
         self.turn_num = 0
@@ -265,8 +268,7 @@ class GameController:
 
         return btn
 
-    @staticmethod
-    def advance_turn(player_action):
+    def advance_turn(self, player_action):
         for entity, speed in dungeon.ordered_speed_of_current_entities.items():
             if entity == player:
                 match player_action:
@@ -274,6 +276,9 @@ class GameController:
                         player.steps_to_take_after_pressing_wasd()
                     case 'interaction':
                         player.interact()
+                        if self.entered_new_level:
+                            self.entered_new_level = False
+                            break
             else:
                 entity.action()
                 entity.prepare_action()
@@ -323,6 +328,10 @@ class Dungeon:
         # The speed is now in descending order, meaning that higher speed entities have a higher index, meaning they go first
         self.ordered_speed_of_current_entities = {}
 
+        self.entity_dicts = [self.current_enemies, self.current_entities, self.speed_of_current_entities, self.ordered_speed_of_current_entities]
+
+        self.finished_loading = False
+
         # Rendering/structures
         if True:
             self.tiles_indexed_by_coords = {}
@@ -339,8 +348,7 @@ class Dungeon:
         # Max rows: 15
         # Max cols: 28
         # copy-paste able characters:
-        # 𝘣
-        self.finished_loading = False
+        # 𝖇
         self.lowest_light_level_in_current_level = 0
         match self.level:
             case -9999:
@@ -370,16 +378,16 @@ class Dungeon:
                 self.level_text = ("wwwwwwwwwwwwwwwwwwwwwwwwwwww\n"
                                    "woooooooooooooooooooooowwwww\n"
                                    "woooooooooooooooooooooobooow\n"
-                                   "wb𝘣bwbobwbbowbbbwbbbwoobooow\n"
+                                   "wb𝖇bwbobwbbowb𝖇bw𝖇bbwoo𝖇ooow\n"
                                    "wooowooowooowooowooowoobooow\n"
-                                   "wopowooowooowooowooowoowwwww\n"
+                                   "wooowooowooowooowooowoowwwww\n"
                                    "wokowooowooowooowooowoobooow\n"
-                                   "wwwwwwwwwwwwwwwwwwwwwoobooow\n"
+                                   "wwwwwwwwwwwwwwwwwwwwwoo𝖇ooow\n"
                                    "wooowooowooowooowooowoobooow\n"
                                    "wooowooowooowooowooowoowwwww\n"
                                    "woozwooowzoowooowooowoobooow\n"
-                                   "wobowooowboowooowoobwoobooow\n"
-                                   "eoooooooooooooooooooooobooow\n"
+                                   "wo𝖇owooowboowooowoobwoo𝖇ooow\n"
+                                   "epooooooooooooooooooooobooow\n"
                                    "eoooooooooooooooooooooowwwww\n"
                                    "wwwwwwwwwwwwwwwwwwwwwwwwwwww\n")
             case 1:
@@ -487,14 +495,20 @@ class Dungeon:
         dungeon.ordered_speed_of_current_entities = {key: val for key, val in
                                                      sorted(dungeon.speed_of_current_entities.items(),
                                                             key=lambda item: item[1], reverse=True)}
-        print(dungeon.ordered_speed_of_current_entities)
 
     def next_level(self):
+        self.finished_loading = False
+        game.entered_new_level = True
         self.level += 1
         #print(self.tiles)
-        for coords, (frame, btn) in dungeon.tiles_indexed_by_coords.items():
+        for coords, (frame, btn) in self.tiles_indexed_by_coords.items():
             frame.destroy()
             btn.destroy()
+
+        for entity_dict in self.entity_dicts:
+            entity_dict.clear()
+
+        self.tiles_indexed_by_coords.clear()
 
         self.set_level_text()
         self.build_level()
@@ -532,7 +546,6 @@ class Inventory:
             if slot[get_btn]['text'] == ' ':
                 #print('item picked up')
                 slot[get_btn]['text'] = item
-                print(f'text: {slot[get_btn]['fg']}')
                 game.update_log('item picked up', item)
                 self.influence_player_highlight()
                 break
@@ -637,7 +650,7 @@ class Player:
             self.vision_direction = self.highlight_direction
 
     def determine_highlighted_button(self):
-        print(f'is weap selected?: {inv.weapon_selected} and {self.attack_mode}')
+        #print(f'is weap selected?: {inv.weapon_selected} and {self.attack_mode}')
         if inv.weapon_selected and self.attack_mode:
             self.highlight_color = game.attack_color
         else:
@@ -706,7 +719,7 @@ class Player:
                 #print('chest interaction')
                 #chest.open(self.btn_highlighted_coords)
             elif (interacted_spot == game.locked_bars or interacted_spot == game.door) and inv.selected_item_slot[get_btn]['text'] == game.key:
-                #print('bars interaction')
+                #print('locked bars interaction')
                 interacted_btn.config(text=' ')
                 inv.destroy_item(game.key)
             elif interacted_spot == game.exit:
@@ -833,8 +846,6 @@ class Player:
 
         if self.change_vision:
             new_light_levels = self.determine_light_levels_of_tiles()
-
-        print(new_light_levels)
 
         if self.change_vision:
             for (frame, btn), new_light_level in new_light_levels.items():
@@ -987,7 +998,7 @@ class Enemy:
                 self.prev_highlighted_tile == player.prev_highlighted_tile or self.highlighted_tile == player.prev_highlighted_tile or self.prev_highlighted_tile == player.highlighted_tile or self.highlighted_tile == player.highlighted_tile):
             light_level = player.rendered_light_levels.get(self.prev_highlighted_tile, 0)
             self.prev_highlighted_tile[get_frame].configure(bg=game.lighting_colors[light_level])
-            print(self.prev_coords, player.rendered_light_levels.get(self.prev_highlighted_tile, 0))
+            #print(self.prev_coords, player.rendered_light_levels.get(self.prev_highlighted_tile, 0))
 
     def steps_to_highlight_button(self):
 
@@ -995,8 +1006,7 @@ class Enemy:
         #print(f'is enemy visible to player: {self.is_visible_to_player}')
 
         self.determine_highlighted_button()
-        if self.is_visible_to_player or (self.prev_visible_to_player and not self.is_visible_to_player) or (
-                player.rendered_light_levels[self.prev_highlighted_tile] == 0 and self.prev_visible_to_player):
+        if self.is_visible_to_player or self.prev_visible_to_player or (self.prev_visible_to_player and not self.is_visible_to_player) or (player.rendered_light_levels[self.prev_highlighted_tile] == 0 and self.prev_visible_to_player):
             self.erase_highlight_from_prev_btn()
 
         if self.do_highlight:
@@ -1284,6 +1294,7 @@ class Shadowcasting:
                 return entity_row - lateral, entity_col - depth
             case 7:  # NW
                 return entity_row - depth, entity_col - lateral
+        return None
 
 
 game = GameController()
