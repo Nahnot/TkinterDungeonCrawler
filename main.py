@@ -370,7 +370,7 @@ class Dungeon:
                 self.level_text = ("wwwwwwwwwwwwwwwwwwwwwwwwwwww\n"
                                    "woooooooooooooooooooooowwwww\n"
                                    "woooooooooooooooooooooobooow\n"
-                                   "wbbbwbobwbbowbbbwbbbwoobooow\n"
+                                   "wb𝘣bwbobwbbowbbbwbbbwoobooow\n"
                                    "wooowooowooowooowooowoobooow\n"
                                    "wopowooowooowooowooowoowwwww\n"
                                    "wokowooowooowooowooowoobooow\n"
