@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="Added locked bar to level 0">
+    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="There were bugs with enemies after switching levels cuz I forgot to clear every single entity dict that I use. I also used an entered new level variable to escape the advance turn loop when entering a new level (sorry english teachers). I also put a locked bar at the center of every jail cell (if it existed beforehand). I also changed its representation from italic b to a bold gotchic lookin b.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
@@ -332,7 +332,23 @@
       <option name="project" value="LOCAL" />
       <updated>1771301575116</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="There were bugs with enemies after switching levels cuz I forgot to clear every single entity dict that I use. I also used an entered new level variable to escape the advance turn loop when entering a new level (sorry english teachers). I also put a locked bar at the center of every jail cell (if it existed beforehand). I also changed its representation from italic b to a bold gotchic lookin b.">
+      <option name="closed" value="true" />
+      <created>1771303672967</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1771303672967</updated>
+    </task>
+    <task id="LOCAL-00026" summary="oops forgot to change the italic b here to dat bold gothic b">
+      <option name="closed" value="true" />
+      <created>1771303823430</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1771303823430</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -363,6 +379,8 @@
     <MESSAGE value="Absolutely massive changes have come. I switched my LOS vision to shadowcasting!!!! Hopefully vision is optimized now. (I used AI though, so minus points for me) Also I'm pretty sure I got speed down. What I did was get the speed of all the entities, organized them using another dict, then looped through that dict (which goes from greatest to least speed) to find out which entity goes first. Also, I brought back player highlighting becoming maroon when weapon is equipped and highlighting diagonally." />
     <MESSAGE value="Made an opaque objects list which would add shadows instead of using just game.wall. There was a bug where vision didn't work properly when a player moved while highlighting diagonally, fixed it by readding determine vision direction to steps after pressing wasd. Made inventory font large font again instead of super small (that was supposed to be for dungeon tiles). Updated level 1 to have as many jail cells as possible. I also created locked bars, and I made it so that they are the ones that can be opened by keys instead of bars. That should be all." />
     <MESSAGE value="Added locked bar to level 0" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added locked bar to level 0" />
+    <MESSAGE value="There were bugs with enemies after switching levels cuz I forgot to clear every single entity dict that I use. I also used an entered new level variable to escape the advance turn loop when entering a new level (sorry english teachers). I also put a locked bar at the center of every jail cell (if it existed beforehand). I also changed its representation from italic b to a bold gotchic lookin b." />
+    <MESSAGE value="oops forgot to change the italic b here to dat bold gothic b" />
+    <option name="LAST_COMMIT_MESSAGE" value="oops forgot to change the italic b here to dat bold gothic b" />
   </component>
 </project>

@@ -134,7 +134,8 @@ class GameController:
                                 '⛓⛓∅⛓\n'
                                 '⛓⛓⛓⛓\n'
                                 '⛓⛓⛓⛓')
-            self.exit = '✦'
+            self.exit_arrows = ['⏶', '⏴', '⏵', '⏷']
+            self.star = '✦'
             self.coin = '¤'
             self.zombie = 'Ψ'
 
@@ -142,9 +143,10 @@ class GameController:
 
         self.singular_interactable_items = [self.key, self.sword]
         self.enemies = [self.zombie]
-        self.solid_objects = [self.wall, self.chest, self.exit, self.door, self.bars, self.locked_bars, self.player]
+        self.solid_objects = [self.wall, self.chest, self.door, self.bars, self.locked_bars, self.player]
         self.solid_objects.extend(self.singular_interactable_items)
         self.solid_objects.extend(self.enemies)
+        self.solid_objects.extend(self.exit_arrows)
         self.opaque_objects = [self.wall, self.door]
 
         self.default_color = '#f0f0f0'
@@ -193,10 +195,6 @@ class GameController:
         return new_frame
 
     def create_button(self, tile_char, parent_frame, btn_type):
-        """
-       Create a single tile widget ONCE during build.
-       Movement will only edit ['text'], never create/destroy tiles.
-       """
 
         # Defaults
         text = ' '
@@ -215,9 +213,9 @@ class GameController:
 
         # Map dungeon glyphs to rendered text/colors
         match tile_char:
-            case 'o':  # open floor
+            case 'o':
                 text = ' '
-            case 'p':  # player start
+            case 'p':
                 text = self.player
             case 'z':
                 text = self.zombie
@@ -228,8 +226,6 @@ class GameController:
                 #fg = 'gold'
             case 'd':
                 text = self.door
-            case 'e':
-                text = self.exit
             case 'b':
                 text = self.bars
             case '𝖇':
@@ -237,8 +233,10 @@ class GameController:
             case 'k':
                 text = self.key
             case _:
-                # anything else is treated as blank floor
                 text = tile_char
+
+        if tile_char in self.exit_arrows:
+            btn_font = large_font
 
         btn = Button(
             parent_frame,
@@ -348,7 +346,7 @@ class Dungeon:
         # Max rows: 15
         # Max cols: 28
         # copy-paste able characters:
-        # 𝖇
+        # 𝖇 ⏴ ⏶ ⏵ ⏷
         self.lowest_light_level_in_current_level = 0
         match self.level:
             case -9999:
@@ -387,8 +385,8 @@ class Dungeon:
                                    "wooowooowooowooowooowoowwwww\n"
                                    "woozwooowzoowooowooowoobooow\n"
                                    "wo𝖇owooowboowooowoobwoo𝖇ooow\n"
-                                   "epooooooooooooooooooooobooow\n"
-                                   "eoooooooooooooooooooooowwwww\n"
+                                   "⏴pooooooooooooooooooooobooow\n"
+                                   "⏴oooooooooooooooooooooowwwww\n"
                                    "wwwwwwwwwwwwwwwwwwwwwwwwwwww\n")
             case 1:
                 if not game.testing:
@@ -722,7 +720,7 @@ class Player:
                 #print('locked bars interaction')
                 interacted_btn.config(text=' ')
                 inv.destroy_item(game.key)
-            elif interacted_spot == game.exit:
+            elif interacted_spot in game.exit_arrows:
                 #print('exited room')
                 dungeon.next_level()
             elif interacted_spot in game.singular_interactable_items:
