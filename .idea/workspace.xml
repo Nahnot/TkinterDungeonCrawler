@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="Currently working on making speed actually work!!! Big architectural change: I have brought back erase prev btn highlight (I'm pretty sure I never had a commit with it) and removed the edge cases from render vision because it annoys me. This will be part 1 of the speed changes.">
+    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="Made an opaque objects list which would add shadows instead of using just game.wall. There was a bug where vision didn't work properly when a player moved while highlighting diagonally, fixed it by readding determine vision direction to steps after pressing wasd. Made inventory font large font again instead of super small (that was sposed to be for dungeon tiles). (Commit unfinished)">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
@@ -21,6 +21,19 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <excluded-from-favorite>
+      <branch-storage>
+        <map>
+          <entry type="LOCAL">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="main" />
+              </list>
+            </value>
+          </entry>
+        </map>
+      </branch-storage>
+    </excluded-from-favorite>
     <option name="PREVIOUS_COMMIT_AUTHORS">
       <list>
         <option value="Nahnot &lt;chavez.darren.f@gmail.com&gt;" />
@@ -295,7 +308,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770784686312</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="Absolutely massive changes have come. I switched my LOS vision to shadowcasting!!!! Hopefully vision is optimized now. (I used AI though, so minus points for me) Also I'm pretty sure I got speed down. What I did was get the speed of all the entities, organized them using another dict, then looped through that dict (which goes from greatest to least speed) to find out which entity goes first. Also, I brought back player highlighting becoming maroon when weapon is equipped and highlighting diagonally.">
+      <option name="closed" value="true" />
+      <created>1771029551399</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1771029551399</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -323,6 +344,7 @@
     <MESSAGE value="Removed player info dict and changed player max hp to 10" />
     <MESSAGE value="Simplified enemy subclasses and removed mentions of action bar (a thing I wanted to do). Currently, I am workshopping game.advance_turn to accomodate speed" />
     <MESSAGE value="Currently working on making speed actually work!!! Big architectural change: I have brought back erase prev btn highlight (I'm pretty sure I never had a commit with it) and removed the edge cases from render vision because it annoys me. This will be part 1 of the speed changes." />
-    <option name="LAST_COMMIT_MESSAGE" value="Currently working on making speed actually work!!! Big architectural change: I have brought back erase prev btn highlight (I'm pretty sure I never had a commit with it) and removed the edge cases from render vision because it annoys me. This will be part 1 of the speed changes." />
+    <MESSAGE value="Absolutely massive changes have come. I switched my LOS vision to shadowcasting!!!! Hopefully vision is optimized now. (I used AI though, so minus points for me) Also I'm pretty sure I got speed down. What I did was get the speed of all the entities, organized them using another dict, then looped through that dict (which goes from greatest to least speed) to find out which entity goes first. Also, I brought back player highlighting becoming maroon when weapon is equipped and highlighting diagonally." />
+    <option name="LAST_COMMIT_MESSAGE" value="Absolutely massive changes have come. I switched my LOS vision to shadowcasting!!!! Hopefully vision is optimized now. (I used AI though, so minus points for me) Also I'm pretty sure I got speed down. What I did was get the speed of all the entities, organized them using another dict, then looped through that dict (which goes from greatest to least speed) to find out which entity goes first. Also, I brought back player highlighting becoming maroon when weapon is equipped and highlighting diagonally." />
   </component>
 </project>
