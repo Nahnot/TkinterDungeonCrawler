@@ -15,6 +15,8 @@ else:
 import random
 import tkinter.scrolledtext as scrolledtext
 
+import tktooltip
+
 #import idlelib.tooltip as tt
 
 from PIL import ImageTk
@@ -28,14 +30,15 @@ GET_COL = 1
 get_frame = 0
 get_btn = 1
 
-WIDTH = 1000
-HEIGHT = 1000
+WIDTH = 1980
+HEIGHT = 1080
 HORIZONTAL_OFFSET = 0
+VERTICAL_OFFSET = 0
 
 window = tk.Tk()
 window.configure(bg='black')
 window.title("Land of Dardar")
-window.geometry(f"{WIDTH}x{HEIGHT}+{HORIZONTAL_OFFSET}+0")
+window.geometry(f"{WIDTH}x{HEIGHT}+{HORIZONTAL_OFFSET}+{VERTICAL_OFFSET}")
 # window.state('zoomed')
 # window.resizable(False, False)
 
@@ -55,12 +58,12 @@ equipment_frame = tk.Frame(big_left_frame, width=450, height=1080 / 2, bg='black
 stats_frame = tk.Frame(big_left_frame, width=450, height=1080 / 2, bg='black')
 blank_frame = tk.Frame(big_left_frame, width=50, bg='black')
 
-equipment_frame.grid(row=0, column=0, sticky='ns')
-stats_frame.grid(row=1, column=0, sticky='ns')
-blank_frame.grid(row=0, column=1, sticky='ns')
+#equipment_frame.grid(row=0, column=0, sticky='ns')
+#stats_frame.grid(row=1, column=0, sticky='ns')
+#blank_frame.grid(row=0, column=1, sticky='ns')
 
 inventory_frame = tk.Frame(big_right_frame, width=500)
-horizontal_blank_frame = tk.Frame(big_right_frame, height=100, bg='black')
+horizontal_blank_frame = tk.Frame(big_right_frame, height=50, bg='black')
 right_vertical_blank_frame = tk.Frame(big_right_frame, width=50, bg='black')
 dungeon_frame = tk.Frame(big_right_frame, bg='black')
 log_frame = tk.Frame(big_right_frame, bg='black')
@@ -111,7 +114,7 @@ orthogonal_directions = ['up', 'down', 'left', 'right']
 
 class GameController:
     def __init__(self):
-        self.testing = False
+        self.testing = True
         # Item, entity, and object glyphs
         if True:
             self.turn = 'player'
@@ -246,12 +249,12 @@ class GameController:
             activebackground=bg,
             activeforeground=fg,
             bg=bg,
-            command=command,
+            command=command
         )
 
         if macOS:
             # noinspection PyArgumentList
-            btn.configure(takefocus=0, focuscolor='', borderless=1)
+            btn.configure(takefocus=0, focuscolor='', borderless=1, focusthickness=0)
             if btn_type == 'dungeon':
                 btn.configure(width=DUNGEON_BTN_WIDTH_IN_PIXELS, height=DUNGEON_BTN_HEIGHT_IN_PIXELS)
             elif btn_type == 'inventory':
@@ -278,8 +281,11 @@ class GameController:
                             self.entered_new_level = False
                             break
             else:
-                entity.action()
-                entity.prepare_action()
+                try:
+                    entity.action()
+                    entity.prepare_action()
+                except RuntimeError:
+                    print('entity does not exist')
 
     def make_log(self):
         self.game_log = tk.scrolledtext.ScrolledText(log_frame,
@@ -312,10 +318,14 @@ class GameController:
     def pass_action(self):
         pass
 
+    def erase_entity(self, enemy_index):
+        del dungeon.current_enemies[enemy_index]
+        del dungeon.current_entities[enemy_index]
+
 
 class Dungeon:
     def __init__(self):
-        self.level = 0
+        self.level = 1
 
         self.lowest_light_level_in_current_level = 0
 
@@ -326,7 +336,10 @@ class Dungeon:
         # The speed is now in descending order, meaning that higher speed entities have a higher index, meaning they go first
         self.ordered_speed_of_current_entities = {}
 
-        self.entity_dicts = [self.current_enemies, self.current_entities, self.speed_of_current_entities, self.ordered_speed_of_current_entities]
+        self.entity_dicts = {'current_enemies': self.current_enemies,
+                             'current_entities': self.current_entities,
+                             'speed_of_current_entities': self.speed_of_current_entities,
+                             'ordered_speed_of_current_entities': self.ordered_speed_of_current_entities}
 
         self.finished_loading = False
 
@@ -352,7 +365,7 @@ class Dungeon:
             case -9999:
                 self.level_text = ("wwwwwwwwwwwwwwwwwwwwwwwwwww\n"
                                    "woooooooooooo\n"
-                                   "wpoooooowoooo\n"
+                                   "wooooooowoopo\n"
                                    "wooowooooooow\n"
                                    "wooooooooooow\n"
                                    "woooooooooooo\n"
@@ -395,7 +408,7 @@ class Dungeon:
                                    "wwwwwwwpwwwwwww\n"
                                    "woooooo⸸oooooow\n"
                                    "wwzwowwbwwwowww\n"
-                                   "wwooowwewwwooow\n"
+                                   "wwoooww⏷wwwooow\n"
                                    "woowwwwwwwwowow\n"
                                    "wowwoooooooowow\n"
                                    "wowwwwwwowwooow\n"
@@ -503,7 +516,7 @@ class Dungeon:
             frame.destroy()
             btn.destroy()
 
-        for entity_dict in self.entity_dicts:
+        for entity_dict in self.entity_dicts.values():
             entity_dict.clear()
 
         self.tiles_indexed_by_coords.clear()
@@ -649,7 +662,7 @@ class Player:
 
     def determine_highlighted_button(self):
         #print(f'is weap selected?: {inv.weapon_selected} and {self.attack_mode}')
-        if inv.weapon_selected and self.attack_mode:
+        if self.attack_mode:
             self.highlight_color = game.attack_color
         else:
             self.highlight_color = game.default_highlight_color
@@ -683,8 +696,16 @@ class Player:
             case _:
                 return
 
-        self.prev_highlighted_tile = self.highlighted_tile[:]
-        self.highlighted_tile = dungeon.tiles_indexed_by_coords[tuple(self.highlighted_coords)]
+        if self.highlighted_tile is not None:
+            self.prev_highlighted_tile = self.highlighted_tile[:]
+        if tuple(self.highlighted_coords) in dungeon.tiles_indexed_by_coords:
+            if not ((self.highlighted_coords[GET_ROW] or self.highlighted_coords[GET_ROW]) < 0 or
+                    self.highlighted_coords[GET_ROW] > dungeon.max_row or self.highlighted_coords[
+                        GET_COL] > dungeon.max_col):
+                self.highlighted_tile = dungeon.tiles_indexed_by_coords[tuple(self.highlighted_coords)]
+                return
+
+        self.highlighted_tile = None
 
     def force_diagonal_highlight_direction(self):
         self.prev_highlight_direction = self.highlight_direction
@@ -699,7 +720,8 @@ class Player:
                 self.highlight_direction = 'down_left'
 
     def apply_highlight_to_button(self):
-        self.highlighted_tile[get_frame].configure(bg=self.highlight_color)
+        if self.highlighted_tile is not None:
+            self.highlighted_tile[get_frame].configure(bg=self.highlight_color)
 
     def erase_highlight_from_prev_btn(self):
         light_level = self.rendered_light_levels[self.prev_highlighted_tile]
@@ -716,7 +738,8 @@ class Player:
                 pass
                 #print('chest interaction')
                 #chest.open(self.btn_highlighted_coords)
-            elif (interacted_spot == game.locked_bars or interacted_spot == game.door) and inv.selected_item_slot[get_btn]['text'] == game.key:
+            elif (interacted_spot == game.locked_bars or interacted_spot == game.door) and \
+                    inv.selected_item_slot[get_btn]['text'] == game.key:
                 #print('locked bars interaction')
                 interacted_btn.config(text=' ')
                 inv.destroy_item(game.key)
@@ -732,6 +755,7 @@ class Player:
                 for enemy in dungeon.current_enemies.values():
                     if enemy.tile_itself == interacted_tile:
                         Combat(attacker=self, attacked=enemy)
+                        break
 
     def parse_key_press(self, key):
 
@@ -1004,7 +1028,9 @@ class Enemy:
         #print(f'is enemy visible to player: {self.is_visible_to_player}')
 
         self.determine_highlighted_button()
-        if self.is_visible_to_player or self.prev_visible_to_player or (self.prev_visible_to_player and not self.is_visible_to_player) or (player.rendered_light_levels[self.prev_highlighted_tile] == 0 and self.prev_visible_to_player):
+        if self.is_visible_to_player or self.prev_visible_to_player or (
+                self.prev_visible_to_player and not self.is_visible_to_player) or (
+                player.rendered_light_levels[self.prev_highlighted_tile] == 0 and self.prev_visible_to_player):
             self.erase_highlight_from_prev_btn()
 
         if self.do_highlight:
@@ -1049,7 +1075,9 @@ class Enemy:
                 highlighted_tile = dungeon.tiles_indexed_by_coords[tuple(self.highlighted_coords)]
                 highlighted_tile[get_frame].configure(
                     bg=game.lighting_colors[player.rendered_light_levels[tuple(highlighted_tile)]])
-                del dungeon.current_enemies[i]
+                del dungeon.speed_of_current_entities[enemy]
+                del dungeon.ordered_speed_of_current_entities[enemy]
+                game.erase_entity(i)
                 break
 
 
