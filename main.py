@@ -15,11 +15,11 @@ else:
 import random
 import tkinter.scrolledtext as scrolledtext
 
-import tktooltip
+#import tktooltip
 
 #import idlelib.tooltip as tt
 
-from PIL import ImageTk
+#from PIL import ImageTk
 
 # TO DO: COMBAT
 
@@ -30,7 +30,7 @@ GET_COL = 1
 get_frame = 0
 get_btn = 1
 
-WIDTH = 1980
+WIDTH = 1920
 HEIGHT = 1080
 HORIZONTAL_OFFSET = 0
 VERTICAL_OFFSET = 0
@@ -54,13 +54,12 @@ big_left_frame.grid(row=0, column=0, sticky='ns')
 big_right_frame.grid(row=0, column=1, sticky='ns')
 big_right_frame.columnconfigure(0, weight=2)
 
-equipment_frame = tk.Frame(big_left_frame, width=450, height=1080 / 2, bg='black')
-stats_frame = tk.Frame(big_left_frame, width=450, height=1080 / 2, bg='black')
-blank_frame = tk.Frame(big_left_frame, width=50, bg='black')
+#equipment_frame = tk.Frame(big_left_frame, width=450, height=1080 / 2, bg='black')
+stats_frame = tk.Frame(big_left_frame, width=300, height=1080 / 2, bg='black')
+#blank_frame = tk.Frame(big_left_frame, width=50, bg='black')
 
 #equipment_frame.grid(row=0, column=0, sticky='ns')
-#stats_frame.grid(row=1, column=0, sticky='ns')
-#blank_frame.grid(row=0, column=1, sticky='ns')
+stats_frame.grid(row=1, column=0, sticky='ns')
 
 inventory_frame = tk.Frame(big_right_frame, width=500)
 horizontal_blank_frame = tk.Frame(big_right_frame, height=50, bg='black')
@@ -114,7 +113,7 @@ orthogonal_directions = ['up', 'down', 'left', 'right']
 
 class GameController:
     def __init__(self):
-        self.testing = True
+        self.testing = False
         # Item, entity, and object glyphs
         if True:
             self.turn = 'player'
@@ -141,12 +140,14 @@ class GameController:
             self.star = '✦'
             self.coin = '¤'
             self.zombie = 'Ψ'
+            self.rock = '●'
+            self.big_rock = '⬤'
 
         self.enable_darkness = True
 
         self.singular_interactable_items = [self.key, self.sword]
         self.enemies = [self.zombie]
-        self.solid_objects = [self.wall, self.chest, self.door, self.bars, self.locked_bars, self.player]
+        self.solid_objects = [self.wall, self.chest, self.door, self.bars, self.locked_bars, self.player, self.rock, self.big_rock]
         self.solid_objects.extend(self.singular_interactable_items)
         self.solid_objects.extend(self.enemies)
         self.solid_objects.extend(self.exit_arrows)
@@ -235,6 +236,10 @@ class GameController:
                 text = self.locked_bars
             case 'k':
                 text = self.key
+            case 'r':
+                text = self.rock
+            case 'R':
+                text = self.big_rock
             case _:
                 text = tile_char
 
@@ -270,22 +275,25 @@ class GameController:
         return btn
 
     def advance_turn(self, player_action):
-        for entity, speed in dungeon.ordered_speed_of_current_entities.items():
-            if entity == player:
-                match player_action:
-                    case 'movement':
-                        player.steps_to_take_after_pressing_wasd()
-                    case 'interaction':
-                        player.interact()
-                        if self.entered_new_level:
-                            self.entered_new_level = False
-                            break
-            else:
-                try:
-                    entity.action()
-                    entity.prepare_action()
-                except RuntimeError:
-                    print('entity does not exist')
+        try:
+            for entity, speed in dungeon.ordered_speed_of_current_entities.items():
+                if entity == player:
+                    match player_action:
+                        case 'movement':
+                            player.steps_to_take_after_pressing_wasd()
+                        case 'interaction':
+                            player.interact()
+                            if self.entered_new_level:
+                                self.entered_new_level = False
+                                break
+                else:
+                    try:
+                        entity.action()
+                        entity.prepare_action()
+                    except RuntimeError:
+                        print('entity does not exist')
+        except RuntimeError:
+            print('entity does not exist')
 
     def make_log(self):
         self.game_log = tk.scrolledtext.ScrolledText(log_frame,
@@ -318,14 +326,15 @@ class GameController:
     def pass_action(self):
         pass
 
-    def erase_entity(self, enemy_index):
+    @staticmethod
+    def erase_entity(enemy_index):
         del dungeon.current_enemies[enemy_index]
         del dungeon.current_entities[enemy_index]
 
 
 class Dungeon:
     def __init__(self):
-        self.level = 1
+        self.level = 0
 
         self.lowest_light_level_in_current_level = 0
 
@@ -387,35 +396,38 @@ class Dungeon:
                                    "wwwwwwwwwwwwwwww")
             case 0:
                 self.level_text = ("wwwwwwwwwwwwwwwwwwwwwwwwwwww\n"
-                                   "woooooooooooooooooooooowwwww\n"
+                                   "wooRroRoooooooRoroooooowwwww\n"
                                    "woooooooooooooooooooooobooow\n"
                                    "wb𝖇bwbobwbbowb𝖇bw𝖇bbwoo𝖇ooow\n"
+                                   "wooowooowooowroowooowoobooow\n"
+                                   "wooowooowooowokrwooowoRwwwww\n"
+                                   "wooowooowooowopowooowoobooow\n"
+                                   "wwwwwwwwwwwwwwwwwwwwwor𝖇ooow\n"
                                    "wooowooowooowooowooowoobooow\n"
-                                   "wooowooowooowooowooowoowwwww\n"
-                                   "wokowooowooowooowooowoobooow\n"
-                                   "wwwwwwwwwwwwwwwwwwwwwoo𝖇ooow\n"
-                                   "wooowooowooowooowooowoobooow\n"
-                                   "wooowooowooowooowooowoowwwww\n"
-                                   "woozwooowzoowooowooowoobooow\n"
+                                   "wooowoRowooowRoowooowoowwwww\n"
+                                   "woozwooowzorwoorwRrowoobooow\n"
                                    "wo𝖇owooowboowooowoobwoo𝖇ooow\n"
-                                   "⏴pooooooooooooooooooooobooow\n"
-                                   "⏴oooooooooooooooooooooowwwww\n"
+                                   "⏴oooooorooooooooooooooobooow\n"
+                                   "⏴ooooooooooRoooRooooooowwwww\n"
                                    "wwwwwwwwwwwwwwwwwwwwwwwwwwww\n")
             case 1:
                 if not game.testing:
                     player.vision_radius = 2
-                self.level_text = ("wwwwwwwwwwwwwww\n"
-                                   "wwwwwwwpwwwwwww\n"
-                                   "woooooo⸸oooooow\n"
-                                   "wwzwowwbwwwowww\n"
-                                   "wwoooww⏷wwwooow\n"
-                                   "woowwwwwwwwowow\n"
-                                   "wowwoooooooowow\n"
-                                   "wowwwwwwowwooow\n"
-                                   "wowoooowowwwoww\n"
-                                   "wooowwoooooo⚷ww\n"
-                                   "wwwwwwwwwwwwwww")
-            case 2:
+                self.level_text = ("wwwwwwwwwwwwwwwwwwwwwwwwwww\n"
+                                   "wwwwwwwwwwwwwpwwwwwwwwwwwww\n"
+                                   "wwwwwwwoooooo⸸oooooowwwwwww\n"
+                                   "wwwwwwwowowow𝖇wwowwowwwwwww\n"
+                                   "wwwwwwwooooow⏷wooowowwwwwww\n"
+                                   "wwwwwwwwowwowwwowooowwwwwww\n"
+                                   "wwwwwwwwoooooooowwowwwwwwww\n"
+                                   "wwwwwwwoowowwwwoooowwwwwwww\n"
+                                   "wwwwwwwowwoooowwooowwwwwwww\n"
+                                   "wwwwwwwoooowwooooookwwwwwww\n"
+                                   "wwwwwwwwwwwwwwwboowwwwwwwww\n"
+                                   "wwwwwwwwwwwwwwwozzwwwwwwwww\n"
+                                   "wwwwwwwwwwwwwwwooowwwwwwwww\n"
+                                   "wwwwwwwwwwwwwwwwwwwwwwwwwww\n")
+            case 9999:
                 self.level_text = ("wwwwwwwwwwww\n"
                                    "p⸸oooowwwwww\n"
                                    "woocoooozooe\n"
@@ -572,6 +584,11 @@ class Inventory:
         self.prev_selected_item_slot = self.selected_item_slot
         self.selected_item_slot = slot
 
+        #print(self.selected_item_slot)
+        for slot_ind, slot in self.inventory.items():
+            if slot == self.selected_item_slot:
+                print(slot_ind)
+
         self.inventory_highlighting()
 
         if dungeon.finished_loading:
@@ -598,13 +615,16 @@ class Inventory:
         else:
             self.weapon_selected = False
 
+        player.determine_highlighted_color()
+        player.apply_highlight_to_button()
+
 
 class Player:
     def __init__(self):
         self.coords = []
-        self.highlight_direction = 'right'
+        self.highlight_direction = 'up'
         self.prev_highlight_direction = 'left'
-        self.vision_direction = 'right'
+        self.vision_direction = 'up'
         self.prev_vision_direction = 'left'
 
         self.highlight_color = game.default_highlight_color
@@ -662,10 +682,8 @@ class Player:
 
     def determine_highlighted_button(self):
         #print(f'is weap selected?: {inv.weapon_selected} and {self.attack_mode}')
-        if self.attack_mode:
-            self.highlight_color = game.attack_color
-        else:
-            self.highlight_color = game.default_highlight_color
+
+        self.determine_highlighted_color()
 
         self.prev_highlighted_coords = self.highlighted_coords.copy()
         self.highlighted_coords = self.coords.copy()
@@ -707,20 +725,15 @@ class Player:
 
         self.highlighted_tile = None
 
-    def force_diagonal_highlight_direction(self):
-        self.prev_highlight_direction = self.highlight_direction
-        match self.prev_highlight_direction:
-            case 'up':
-                self.highlight_direction = 'up_left'
-            case 'right':
-                self.highlight_direction = 'up_right'
-            case 'down':
-                self.highlight_direction = 'down_right'
-            case 'left':
-                self.highlight_direction = 'down_left'
+    def determine_highlighted_color(self):
+        if self.attack_mode and inv.weapon_selected:
+            self.highlight_color = game.attack_color
+        else:
+            self.highlight_color = game.default_highlight_color
 
     def apply_highlight_to_button(self):
         if self.highlighted_tile is not None:
+            print('highlighted!')
             self.highlighted_tile[get_frame].configure(bg=self.highlight_color)
 
     def erase_highlight_from_prev_btn(self):
@@ -1017,7 +1030,7 @@ class Enemy:
 
     def erase_highlight_from_prev_btn(self):
         if not (
-                self.prev_highlighted_tile == player.prev_highlighted_tile or self.highlighted_tile == player.prev_highlighted_tile or self.prev_highlighted_tile == player.highlighted_tile or self.highlighted_tile == player.highlighted_tile):
+                 self.prev_highlighted_tile == player.highlighted_tile or self.highlighted_tile == player.highlighted_tile):
             light_level = player.rendered_light_levels.get(self.prev_highlighted_tile, 0)
             self.prev_highlighted_tile[get_frame].configure(bg=game.lighting_colors[light_level])
             #print(self.prev_coords, player.rendered_light_levels.get(self.prev_highlighted_tile, 0))
@@ -1028,10 +1041,7 @@ class Enemy:
         #print(f'is enemy visible to player: {self.is_visible_to_player}')
 
         self.determine_highlighted_button()
-        if self.is_visible_to_player or self.prev_visible_to_player or (
-                self.prev_visible_to_player and not self.is_visible_to_player) or (
-                player.rendered_light_levels[self.prev_highlighted_tile] == 0 and self.prev_visible_to_player):
-            self.erase_highlight_from_prev_btn()
+        self.erase_highlight_from_prev_btn()
 
         if self.do_highlight:
             self.determine_highlight_color()
@@ -1112,9 +1122,6 @@ class Zombie(Enemy):
         else:
             if self.is_diagonally_adjacent_to_player():
                 self.state = 'attack'
-            elif not self.sees_player and (self.prev_saw_player or self.prev_prev_state == 'pursuit') and (
-                    self.prev_state == 'aggro' or self.prev_state == 'freeze'):
-                self.state = 'pursuit'
             else:
                 if self.sees_player:
                     self.state = 'aggro'
@@ -1132,9 +1139,6 @@ class Zombie(Enemy):
                 self.wander()
             case 'aggro':
                 self.move_towards_player()
-            case 'pursuit':
-                if dungeon.tiles_indexed_by_coords[tuple(self.highlighted_coords)][get_btn]['text'] == game.wall:
-                    self.state = 'freeze'
             case 'attack':
                 self.prepare_to_attack_player()
             case 'freeze':
@@ -1143,7 +1147,7 @@ class Zombie(Enemy):
         self.steps_to_highlight_button()
 
     def action(self):
-        if self.state == 'idle' or self.state == 'aggro' or self.state == 'pursuit':
+        if self.state == 'idle' or self.state == 'aggro':
             self.prev_coords = self.coords.copy()
             self.coords = dungeon.find_new_location(
                 self.enemy_type,
