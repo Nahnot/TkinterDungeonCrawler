@@ -46,22 +46,35 @@ super_small_font = font.Font(family="Courier", size=13)
 small_font = font.Font(family="Courier", size=15)
 large_font = font.Font(family="Courier", size=20)
 very_large_font = font.Font(family="Courier", size=30)
+bold_large_font = font.Font(family="Courier", size=20, weight='bold')
 
-big_left_frame = tk.Frame(window, bg='black')
+big_left_frame = tk.Frame(window, bg='lawn green')
 big_right_frame = tk.Frame(window, bg='black')
 
 big_left_frame.grid(row=0, column=0, sticky='ns')
 big_right_frame.grid(row=0, column=1, sticky='ns')
-big_right_frame.columnconfigure(0, weight=2)
 
 #equipment_frame = tk.Frame(big_left_frame, width=450, height=1080 / 2, bg='black')
-stats_frame = tk.Frame(big_left_frame, width=300, height=1080 / 2, bg='black')
-#blank_frame = tk.Frame(big_left_frame, width=50, bg='black')
+stats_frame = tk.Frame(big_left_frame, bg='black')
+big_left_frame_horizontal_blank_frame = tk.Frame(big_left_frame, width=100, bg='black')
 
 #equipment_frame.grid(row=0, column=0, sticky='ns')
-stats_frame.grid(row=1, column=0, sticky='ns')
+stats_frame.grid(row=0, column=0, sticky='ew')
+big_left_frame_horizontal_blank_frame.grid(row=0, column=1, sticky='ew')
 
-inventory_frame = tk.Frame(big_right_frame, width=500)
+stats_header = tk.Label(stats_frame, text='Stats:', font=bold_large_font, bg='black', fg='white')
+stats_vertical_blank_frame = tk.Frame(stats_frame, height=200, bg='black')
+stats_horizontal_blank_frame = tk.Frame(stats_frame, width=50, bg='black')
+stats_hp_text = tk.Label(stats_frame, text='HP: XX/XX', font=large_font, bg='black', fg='white')
+stats_damage_text = tk.Label(stats_frame, text='Damage: X', font=large_font, bg='black', fg='white')
+
+stats_horizontal_blank_frame.grid(row=0, column=0, rowspan=100, sticky='ew')
+stats_vertical_blank_frame.grid(row=0, column=2, sticky='ew')
+stats_header.grid(row=1, column=1, sticky='ew')
+stats_hp_text.grid(row=2, column=1, sticky='ew')
+stats_damage_text.grid(row=3, column=1, sticky='ew')
+
+inventory_frame = tk.Frame(big_right_frame, width=500, bg='black')
 horizontal_blank_frame = tk.Frame(big_right_frame, height=50, bg='black')
 right_vertical_blank_frame = tk.Frame(big_right_frame, width=50, bg='black')
 dungeon_frame = tk.Frame(big_right_frame, bg='black')
@@ -113,12 +126,13 @@ orthogonal_directions = ['up', 'down', 'left', 'right']
 
 class GameController:
     def __init__(self):
-        self.testing = False
+        self.testing = True
         # Item, entity, and object glyphs
         if True:
             self.turn = 'player'
             self.player = '@'
             self.sword = '⸸'
+            self.cool_sword = '⊰═]二フ'
             self.wall = ('▀▀ ▀▀ \n'
                          ' ▀▀ ▀▀\n'
                          '▀▀ ▀▀ \n'
@@ -136,17 +150,25 @@ class GameController:
                                 '⛓⛓∅⛓\n'
                                 '⛓⛓⛓⛓\n'
                                 '⛓⛓⛓⛓')
+            self.broken_bars = ('⛓ ⛓⛓\n'
+                                '   ⛓\n'
+                                '⛓⛓  \n'
+                                ' ⛓ ⛓')
             self.exit_arrows = ['⏶', '⏴', '⏵', '⏷']
             self.star = '✦'
             self.coin = '¤'
             self.zombie = 'Ψ'
             self.rock = '●'
             self.big_rock = '⬤'
+            self.small_health_potion = '⚗'
 
         self.enable_darkness = True
 
-        self.singular_interactable_items = [self.key, self.sword]
+        self.singular_interactable_items = [self.key, self.small_health_potion]
         self.enemies = [self.zombie]
+        self.weapons = [self.sword, self.cool_sword]
+        self.singular_interactable_items.extend(self.weapons)
+
         self.solid_objects = [self.wall, self.chest, self.door, self.bars, self.locked_bars, self.player, self.rock, self.big_rock]
         self.solid_objects.extend(self.singular_interactable_items)
         self.solid_objects.extend(self.enemies)
@@ -219,7 +241,7 @@ class GameController:
         match tile_char:
             case 'o':
                 text = ' '
-            case 'p':
+            case '@':
                 text = self.player
             case 'z':
                 text = self.zombie
@@ -234,12 +256,19 @@ class GameController:
                 text = self.bars
             case '𝖇':
                 text = self.locked_bars
+            case '𝘣':
+                text = self.broken_bars
             case 'k':
                 text = self.key
             case 'r':
                 text = self.rock
             case 'R':
                 text = self.big_rock
+            case 'p':
+                text = self.small_health_potion
+                #fg = 'red'
+            case 's':
+                text = self.cool_sword
             case _:
                 text = tile_char
 
@@ -308,16 +337,17 @@ class GameController:
 
     def update_log(self, event_type, event_objects):
         if event_type == 'item picked up':
+            if event_objects == game.small_health_potion:
+                event_objects = 'Small Health Potion'
             text = f"{event_objects} has been picked up!\n"
-            first_word, other_text = text.split(' ', 1)
+            """first_word, other_text = text.split(' ', 1)
             text_list = [first_word, other_text]
             first_word.title()
             " ".join(text_list)
+            print(text_list)"""
         elif event_type == 'combat':
-            attacker = event_objects[0]
-            attacked = event_objects[1]
-            damage = event_objects[2]
-            text = f"{attacker} hit {attacked} for {damage}!\n"
+            attacker, attacked, damage = event_objects
+            text = f"{attacker} hit {attacked} for {damage} damage!\n"
         self.game_log['state'] = 'normal'
         # noinspection PyUnboundLocalVariable
         self.game_log.insert('1.0', text)
@@ -331,10 +361,19 @@ class GameController:
         del dungeon.current_enemies[enemy_index]
         del dungeon.current_entities[enemy_index]
 
+    @staticmethod
+    def update_player_stats(list_of_updates):
+        for update in list_of_updates:
+            match update:
+                case 'hp':
+                    stats_hp_text['text'] = f'HP: {player.hp}/{player.max_hp}'
+                case 'damage':
+                    stats_damage_text['text'] = f'Damage: {player.damage}'
+
 
 class Dungeon:
     def __init__(self):
-        self.level = 0
+        self.level = 2
 
         self.lowest_light_level_in_current_level = 0
 
@@ -368,13 +407,13 @@ class Dungeon:
         # Max rows: 15
         # Max cols: 28
         # copy-paste able characters:
-        # 𝖇 ⏴ ⏶ ⏵ ⏷
+        # 𝖇 ⏴ ⏶ ⏵ ⏷ ⸸
         self.lowest_light_level_in_current_level = 0
         match self.level:
             case -9999:
                 self.level_text = ("wwwwwwwwwwwwwwwwwwwwwwwwwww\n"
                                    "woooooooooooo\n"
-                                   "wooooooowoopo\n"
+                                   "wooooooowoo@o\n"
                                    "wooowooooooow\n"
                                    "wooooooooooow\n"
                                    "woooooooooooo\n"
@@ -391,41 +430,41 @@ class Dungeon:
                                    "woooooooooooooow\n"
                                    "wooooooowoooooow\n"
                                    "wooowooooozowoow\n"
-                                   "woop⸸ooooooowoow\n"
+                                   "woo@⸸ooooooowoow\n"
                                    "woooooooooooooow\n"
                                    "wwwwwwwwwwwwwwww")
-            case 0:
+            case 1:
                 self.level_text = ("wwwwwwwwwwwwwwwwwwwwwwwwwwww\n"
-                                   "wooRroRoooooooRoroooooowwwww\n"
-                                   "woooooooooooooooooooooobooow\n"
-                                   "wb𝖇bwbobwbbowb𝖇bw𝖇bbwoo𝖇ooow\n"
-                                   "wooowooowooowroowooowoobooow\n"
+                                   "wooRroRoooooooRorooooRkwwwww\n"
+                                   "wooooooooooooooooooooorbooow\n"
+                                   "wbbbwbobwbbowb𝖇bw𝖇bbwoobooow\n"
+                                   "wooowooowooowroowpoowoobooow\n"
                                    "wooowooowooowokrwooowoRwwwww\n"
-                                   "wooowooowooowopowooowoobooow\n"
-                                   "wwwwwwwwwwwwwwwwwwwwwor𝖇ooow\n"
+                                   "wooowooowoopwo@owooowoobooow\n"
+                                   "wwwwwwwwwwwwwwwwwwwwworbooow\n"
                                    "wooowooowooowooowooowoobooow\n"
                                    "wooowoRowooowRoowooowoowwwww\n"
                                    "woozwooowzorwoorwRrowoobooow\n"
-                                   "wo𝖇owooowboowooowoobwoo𝖇ooow\n"
+                                   "wboowooowboowooowoobwoobooow\n"
                                    "⏴oooooorooooooooooooooobooow\n"
                                    "⏴ooooooooooRoooRooooooowwwww\n"
                                    "wwwwwwwwwwwwwwwwwwwwwwwwwwww\n")
-            case 1:
+            case 2:
                 if not game.testing:
-                    player.vision_radius = 2
+                    player.vision_radius = 3
                 self.level_text = ("wwwwwwwwwwwwwwwwwwwwwwwwwww\n"
-                                   "wwwwwwwwwwwwwpwwwwwwwwwwwww\n"
-                                   "wwwwwwwoooooo⸸oooooowwwwwww\n"
-                                   "wwwwwwwowowow𝖇wwowwowwwwwww\n"
+                                   "wwwwwwwwwwwww@wwwwwwwwwwwww\n"
+                                   "wwwwwwwoooooosoooooowwwwwww\n"
+                                   "wwwwwwwowpwow𝖇wwowwowwwwwww\n"
                                    "wwwwwwwooooow⏷wooowowwwwwww\n"
                                    "wwwwwwwwowwowwwowooowwwwwww\n"
                                    "wwwwwwwwoooooooowwowwwwwwww\n"
                                    "wwwwwwwoowowwwwoooowwwwwwww\n"
-                                   "wwwwwwwowwoooowwooowwwwwwww\n"
-                                   "wwwwwwwoooowwooooookwwwwwww\n"
-                                   "wwwwwwwwwwwwwwwboowwwwwwwww\n"
-                                   "wwwwwwwwwwwwwwwozzwwwwwwwww\n"
-                                   "wwwwwwwwwwwwwwwooowwwwwwwww\n"
+                                   "wwwwwwwowwoooowoooowwwwwwww\n"
+                                   "wwwwwwwoooowwoooobwwwwwwwww\n"
+                                   "wwwwwwwwwwwwwwwooowwwwwwww\n"
+                                   "wwwwwwwwwwwwwwwzozwwwwwwwww\n"
+                                   "wwwwwwwwwwwwwwwokowwwwwwwww\n"
                                    "wwwwwwwwwwwwwwwwwwwwwwwwwww\n")
             case 9999:
                 self.level_text = ("wwwwwwwwwwww\n"
@@ -571,23 +610,27 @@ class Inventory:
                 slot[get_btn]['text'] = item
                 game.update_log('item picked up', item)
                 self.influence_player_highlight()
+                if item == game.small_health_potion:
+                    self.change_inventory_slot_fg(slot, item)
+                if item == game.cool_sword:
+                    slot[get_btn]['font'] = small_font
                 break
 
-    def destroy_item(self, item):
-        for i, slot in self.inventory.items():
-            if slot[get_btn]['text'] == item:
-                #print('item destroyed')
-                slot[get_btn].config(text=' ')
-                break
+    def destroy_selected_item(self):
+        slot = self.selected_item_slot
+        item = slot[get_btn]['text']
+        if item == game.small_health_potion:
+            self.change_inventory_slot_fg(self.selected_item_slot, 'destroyed')
+        slot[get_btn]['text'] = ' '
 
     def select_item(self, slot):
         self.prev_selected_item_slot = self.selected_item_slot
         self.selected_item_slot = slot
 
         #print(self.selected_item_slot)
-        for slot_ind, slot in self.inventory.items():
+        """for slot_ind, slot in self.inventory.items():
             if slot == self.selected_item_slot:
-                print(slot_ind)
+                #print(slot_ind)"""
 
         self.inventory_highlighting()
 
@@ -610,13 +653,30 @@ class Inventory:
         self.select_item(self.inventory[int(num) - 1])
 
     def influence_player_highlight(self):
-        if self.selected_item_slot[get_btn]['text'] == game.sword:
+        selected_item = self.selected_item_slot[get_btn]['text']
+        if selected_item in game.weapons:
             self.weapon_selected = True
+            match selected_item:
+                case game.sword:
+                    player.damage = 1
+                case game.cool_sword:
+                    player.damage = 3
         else:
             self.weapon_selected = False
+            player.damage = 0
+
+        game.update_player_stats(['damage'])
 
         player.determine_highlighted_color()
         player.apply_highlight_to_button()
+
+    @staticmethod
+    def change_inventory_slot_fg(slot, item):
+        match item:
+            case game.small_health_potion:
+                slot[get_btn]['fg'] = 'red'
+            case _:
+                slot[get_btn]['fg'] = 'black'
 
 
 class Player:
@@ -633,9 +693,9 @@ class Player:
         self.max_hp = 10
         self.hp = self.max_hp
         self.speed = 10
-        self.damage = 1
+        self.damage = 0
         if not game.testing:
-            self.vision_radius = 1
+            self.vision_radius = 2
         else:
             self.vision_radius = 5
 
@@ -647,6 +707,7 @@ class Player:
     def init_every_level(self):
         self.rendered_light_levels = {}
         self.prev_light_levels = {}
+        print(dungeon.tiles_indexed_by_coords)
         for coords, (frame, btn) in dungeon.tiles_indexed_by_coords.items():
             self.rendered_light_levels[(frame, btn)] = 0
             if btn['text'] == game.player:
@@ -733,7 +794,7 @@ class Player:
 
     def apply_highlight_to_button(self):
         if self.highlighted_tile is not None:
-            print('highlighted!')
+            #print('highlighted!')
             self.highlighted_tile[get_frame].configure(bg=self.highlight_color)
 
     def erase_highlight_from_prev_btn(self):
@@ -755,20 +816,32 @@ class Player:
                     inv.selected_item_slot[get_btn]['text'] == game.key:
                 #print('locked bars interaction')
                 interacted_btn.config(text=' ')
-                inv.destroy_item(game.key)
+                inv.destroy_selected_item()
             elif interacted_spot in game.exit_arrows:
                 #print('exited room')
                 dungeon.next_level()
             elif interacted_spot in game.singular_interactable_items:
                 for item in game.singular_interactable_items:
+                    if item == game.small_health_potion:
+                        interacted_btn['fg'] = 'black'
                     if item == interacted_spot:
                         inv.pick_up_item(item)
                         interacted_btn.config(text=' ')
+                        break
             elif interacted_spot in game.enemies and self.attack_mode:
                 for enemy in dungeon.current_enemies.values():
                     if enemy.tile_itself == interacted_tile:
                         Combat(attacker=self, attacked=enemy)
                         break
+
+    def consume_item(self):
+        if inv.selected_item_slot[get_btn]['text'] == game.small_health_potion:
+            # print('potion drunk')
+            self.hp += 5
+            game.update_player_stats(['hp'])
+            inv.destroy_selected_item()
+            """if self.hp > self.max_hp:
+                self.hp = self.max_hp"""
 
     def parse_key_press(self, key):
 
@@ -825,6 +898,10 @@ class Player:
             else:
                 self.attack_mode = False
             self.steps_to_take_after_pressing_looking_keys()
+
+        elif key == 'e':
+            self.consume_item()
+            game.advance_turn('interaction')
 
         elif key == 'space':
             game.advance_turn('interaction')
@@ -892,7 +969,10 @@ class Player:
                 tile_color = game.lighting_colors[new_light_level]
 
                 frame.configure(bg=tile_color)
-                btn.configure(bg=tile_color, fg='black')
+                if btn['text'] != game.small_health_potion:
+                    btn.configure(bg=tile_color, fg='black')
+                else:
+                    btn.configure(bg=tile_color, fg='red')
 
                 self.rendered_light_levels[(frame, btn)] = new_light_level
 
@@ -1195,6 +1275,7 @@ class Combat:
         attacked.hp -= attacker.damage
         if isinstance(attacker, Enemy):
             game.update_log('combat', [attacker.enemy_type, 'you', attacker.damage])
+            game.update_player_stats(['hp'])
         else:
             game.update_log('combat', ['You', attacked.enemy_type, attacker.damage])
 
@@ -1275,7 +1356,7 @@ class Shadowcasting:
                     )
 
                 # If tile blocks light, add a shadow interval
-                if tile[get_btn]["text"] in game.opaque_objects:
+                if tile[get_btn]['text'] in game.opaque_objects:
                     self._add_shadow(shadowed_intervals, left_slope, right_slope)
 
             # Early exit: full shadow
@@ -1333,6 +1414,7 @@ dungeon = Dungeon()
 inv = Inventory()
 player = Player()
 dungeon.locate_important_objects_and_entities()
+game.update_player_stats(['hp', 'damage'])
 dungeon.finished_loading = True
 
 
