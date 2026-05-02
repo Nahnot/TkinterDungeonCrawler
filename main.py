@@ -48,7 +48,7 @@ large_font = font.Font(family="Courier", size=20)
 very_large_font = font.Font(family="Courier", size=30)
 bold_large_font = font.Font(family="Courier", size=20, weight='bold')
 
-big_left_frame = tk.Frame(window, bg='lawn green')
+big_left_frame = tk.Frame(window, bg='black')
 big_right_frame = tk.Frame(window, bg='black')
 
 big_left_frame.grid(row=0, column=0, sticky='ns')
@@ -122,6 +122,8 @@ visible_octants_for_each_direction = {
 }
 
 orthogonal_directions = ['up', 'down', 'left', 'right']
+horizontal_directions = ['left', 'right']
+vertical_directions = ['up', 'down']
 
 
 class GameController:
@@ -321,6 +323,11 @@ class GameController:
                         entity.prepare_action()
                     except RuntimeError:
                         print('entity does not exist')
+            player.render_vision()
+            player.erase_highlight_from_prev_btn()
+            for enemy in dungeon.current_enemies.values():
+                enemy.steps_to_highlight_button()
+            player.apply_highlight_to_button()
         except RuntimeError:
             print('entity does not exist')
 
@@ -533,14 +540,18 @@ class Dungeon:
 
         new_tile = self.tiles_indexed_by_coords[tuple(entity_coords)][get_btn]
 
-        blocked = new_tile['text'] == game.player or new_tile['text'] in game.enemies or new_tile[
-            'text'] in game.singular_interactable_items or new_tile['text'] in game.solid_objects
-        if blocked or new_tile is None:
-            if entity == game.player:
-                player.changed_location = False
-            return prev_entity_coords
+        if new_tile is not None:
+            if self.tile_is_blocked(new_tile):
+                if entity == game.player:
+                    player.changed_location = False
+                return prev_entity_coords
 
         return entity_coords
+
+    @staticmethod
+    def tile_is_blocked(the_tile):
+        return (the_tile['text'] == game.player or the_tile['text'] in game.enemies or the_tile[
+            'text'] in game.singular_interactable_items or the_tile['text'] in game.solid_objects)
 
     def go_to_new_location(self, entity, entity_coords, prev_entity_coords):
         new_tile = self.tiles_indexed_by_coords[tuple(entity_coords)][get_btn]
@@ -720,7 +731,6 @@ class Player:
         self.highlighted_coords = self.coords.copy()
         self.highlighted_tile = dungeon.tiles_indexed_by_coords[tuple(self.coords)]
         self.prev_highlighted_coords = None
-        self.change_vision = True
 
         self.determine_vision_direction()
         self.render_vision()
@@ -728,7 +738,6 @@ class Player:
         self.apply_highlight_to_button()
 
     def determine_vision_direction(self):
-        self.change_vision = True
         self.prev_vision_direction = self.vision_direction
         if '_right' in self.highlight_direction and self.prev_vision_direction == 'left':
             self.vision_direction = 'right'
@@ -844,7 +853,6 @@ class Player:
                 self.hp = self.max_hp"""
 
     def parse_key_press(self, key):
-
         if key in ['w', 'a', 's', 'd']:
             match key:
                 case 'w':
@@ -909,8 +917,6 @@ class Player:
             inv.register_inventory_number(key)
 
     def steps_to_take_after_pressing_wasd(self):
-        if not self.change_vision:
-            self.change_vision = True
         dungeon.go_to_new_location(game.player, self.coords, self.prev_coords)
         self.erase_highlight_from_prev_btn()
         self.apply_highlight_to_button()
@@ -918,12 +924,10 @@ class Player:
     def steps_to_take_after_pressing_looking_keys(self):
 
         self.determine_vision_direction()
-        self.change_vision = False
 
         if self.prev_highlight_direction != self.highlight_direction:
             self.determine_highlighted_button()
         if self.prev_vision_direction != self.vision_direction:
-            self.change_vision = True
             self.render_vision()
 
         if self.prev_highlight_direction != self.highlight_direction:
@@ -956,33 +960,31 @@ class Player:
     def render_vision(self):
         self.prev_rendered_light_levels = self.rendered_light_levels.copy()
 
-        if self.change_vision:
-            new_light_levels = self.determine_light_levels_of_tiles()
+        new_light_levels = self.determine_light_levels_of_tiles()
 
-        if self.change_vision:
-            for (frame, btn), new_light_level in new_light_levels.items():
-                old_light_level = self.prev_rendered_light_levels[(frame, btn)]
+        for (frame, btn), new_light_level in new_light_levels.items():
+            old_light_level = self.prev_rendered_light_levels[(frame, btn)]
 
-                if new_light_level == old_light_level:
-                    continue
+            if new_light_level == old_light_level:
+                continue
 
-                tile_color = game.lighting_colors[new_light_level]
+            tile_color = game.lighting_colors[new_light_level]
 
+            frame.configure(bg=tile_color)
+            if btn['text'] != game.small_health_potion:
+                btn.configure(bg=tile_color, fg='black')
+            else:
+                btn.configure(bg=tile_color, fg='red')
+
+            self.rendered_light_levels[(frame, btn)] = new_light_level
+
+        for (frame, btn), _ in self.prev_light_levels.items():
+            if (frame, btn) not in new_light_levels:
+                tile_color = game.lighting_colors[0]
                 frame.configure(bg=tile_color)
-                if btn['text'] != game.small_health_potion:
-                    btn.configure(bg=tile_color, fg='black')
-                else:
-                    btn.configure(bg=tile_color, fg='red')
+                btn.configure(bg=tile_color, fg='black')
 
-                self.rendered_light_levels[(frame, btn)] = new_light_level
-
-            for (frame, btn), _ in self.prev_light_levels.items():
-                if (frame, btn) not in new_light_levels:
-                    tile_color = game.lighting_colors[0]
-                    frame.configure(bg=tile_color)
-                    btn.configure(bg=tile_color, fg='black')
-
-                    self.rendered_light_levels[(frame, btn)] = 0
+                self.rendered_light_levels[(frame, btn)] = 0
 
         self.prev_light_levels = new_light_levels.copy()
 
@@ -994,6 +996,7 @@ class Enemy:
     def __init__(self, enemy_type, row, col):
         self.coords = [row, col]
         self.prev_coords = self.coords.copy()
+        self.potential_coords = []
         self.tile_itself = dungeon.tiles_indexed_by_coords[tuple(self.coords.copy())]
 
         self.highlighted_coords = self.coords.copy()
@@ -1048,7 +1051,7 @@ class Enemy:
             self.is_visible_to_player = False
             self.do_highlight = False
 
-    def move_towards_player(self):
+    def look_towards_player(self):
         entity_row, entity_col = self.coords
         player_row, player_col = player.coords
 
@@ -1103,6 +1106,35 @@ class Enemy:
         self.prev_highlighted_tile = self.highlighted_tile[:]
         self.highlighted_tile = dungeon.tiles_indexed_by_coords[tuple(self.highlighted_coords)]
 
+    def figure_out_potential_coords(self, temp_direction):
+        self.potential_coords = self.coords.copy()
+
+        match temp_direction:
+            case 'up_left':
+                self.potential_coords[GET_ROW] -= 1
+                self.potential_coords[GET_COL] -= 1
+            case 'up':
+                self.potential_coords[GET_ROW] -= 1
+            case 'up_right':
+                self.potential_coords[GET_ROW] -= 1
+                self.potential_coords[GET_COL] += 1
+            case 'left':
+                self.potential_coords[GET_COL] -= 1
+            case 'right':
+                self.potential_coords[GET_COL] += 1
+            case 'down_left':
+                self.potential_coords[GET_ROW] += 1
+                self.potential_coords[GET_COL] -= 1
+            case 'down':
+                self.potential_coords[GET_ROW] += 1
+            case 'down_right':
+                self.potential_coords[GET_ROW] += 1
+                self.potential_coords[GET_COL] += 1
+            case 'self':
+                pass
+            case _:
+                return
+
     def apply_highlight_to_button(self):
         if self.highlighted_tile != player.highlighted_tile:
             frame, btn = self.highlighted_tile
@@ -1116,7 +1148,6 @@ class Enemy:
             #print(self.prev_coords, player.rendered_light_levels.get(self.prev_highlighted_tile, 0))
 
     def steps_to_highlight_button(self):
-
         self.check_self_visibility_and_highlight_status()
         #print(f'is enemy visible to player: {self.is_visible_to_player}')
 
@@ -1126,6 +1157,8 @@ class Enemy:
         if self.do_highlight:
             self.determine_highlight_color()
             self.apply_highlight_to_button()
+
+        self.potential_coords = []
 
     def determine_vision_direction(self):
         self.prev_vision_direction = self.vision_direction
@@ -1200,7 +1233,9 @@ class Zombie(Enemy):
         if self.prev_state != 'freeze':
             self.state = 'freeze'
         else:
-            if self.is_diagonally_adjacent_to_player():
+            if self.is_orthogonally_adjacent_to_player():
+                self.state = 'aggro'
+            elif self.is_diagonally_adjacent_to_player():
                 self.state = 'attack'
             else:
                 if self.sees_player:
@@ -1213,20 +1248,26 @@ class Zombie(Enemy):
 
     def prepare_action(self):
         self.update_state()
+        print(f'state: {self.state}')
 
         match self.state:
             case 'idle':
                 self.wander()
             case 'aggro':
-                self.move_towards_player()
+                if not self.is_orthogonally_adjacent_to_player():
+                    self.look_towards_player()
+                else:
+                    self.prepare_sidestep()
             case 'attack':
                 self.prepare_to_attack_player()
-            case 'freeze':
-                pass
+
+            # If state = freeze, do nothing
 
         self.steps_to_highlight_button()
 
     def action(self):
+        self.determine_vision_direction()
+        print(f'statey: {self.state}')
         if self.state == 'idle' or self.state == 'aggro':
             self.prev_coords = self.coords.copy()
             self.coords = dungeon.find_new_location(
@@ -1249,6 +1290,56 @@ class Zombie(Enemy):
             self.turns_moving_in_same_direction = 0
         else:
             self.turns_moving_in_same_direction += 1
+
+    def prepare_sidestep(self):
+        entity_row, entity_col = self.coords
+        player_row, player_col = player.coords
+
+        # Determine which axis is "primary"
+        player_more_vertical = abs(player_row - entity_row) > abs(player_col - entity_col)
+
+        if player_more_vertical:
+            sidestep_dirs = horizontal_directions[:]  # try left/right first
+            fallback_dirs = vertical_directions[:]  # then up/down
+        else:
+            sidestep_dirs = vertical_directions[:]  # try up/down first
+            fallback_dirs = horizontal_directions[:]  # then left/right
+
+        # Try sidestep directions first
+        random.shuffle(sidestep_dirs)
+        for temp_dir in sidestep_dirs:
+            self.figure_out_potential_coords(temp_dir)
+
+            row, col = self.potential_coords
+
+            # bounds check
+            if (row, col) not in dungeon.tiles_indexed_by_coords:
+                continue
+
+            tile_btn = dungeon.tiles_indexed_by_coords[(row, col)][get_btn]
+
+            if not dungeon.tile_is_blocked(tile_btn):
+                self.highlight_direction = temp_dir
+                return
+
+        # If sidestep fails, try fallback directions
+        random.shuffle(fallback_dirs)
+        for temp_dir in fallback_dirs:
+            self.figure_out_potential_coords(temp_dir)
+
+            row, col = self.potential_coords
+
+            if (row, col) not in dungeon.tiles_indexed_by_coords:
+                continue
+
+            tile_btn = dungeon.tiles_indexed_by_coords[(row, col)][get_btn]
+
+            if not dungeon.tile_is_blocked(tile_btn):
+                self.highlight_direction = temp_dir
+                return
+
+        # If totally trapped, just don't change direction
+        return
 
     def prepare_to_attack_player(self):
         # Figure out attack direction

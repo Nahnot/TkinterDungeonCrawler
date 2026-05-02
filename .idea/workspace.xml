@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="I fixed some things that got unfixed somehow idk man">
+    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="Added player stats, a health potion, and a cool sword.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
@@ -381,7 +381,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777677320014</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="Added player stats, a health potion, and a cool sword.">
+      <option name="closed" value="true" />
+      <created>1777753524997</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1777753524998</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -420,6 +428,7 @@
     <MESSAGE value="So erm I made exit star be exit arrows (technically triangles) instead yay! This means I removed case 'e' from create_button." />
     <MESSAGE value="Essentially, I made enemies not buggy when they die. That's pretty much it." />
     <MESSAGE value="I fixed some things that got unfixed somehow idk man" />
-    <option name="LAST_COMMIT_MESSAGE" value="I fixed some things that got unfixed somehow idk man" />
+    <MESSAGE value="Added player stats, a health potion, and a cool sword." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added player stats, a health potion, and a cool sword." />
   </component>
 </project>
