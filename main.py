@@ -1504,41 +1504,6 @@ class Weapons:
         return self.damage
 
 
-"""class Chest:
-    def __init__(self):
-        self.chests_in_level = {}
-        self.figure_out_their_locations()
-        self.contents_all_chests = {
-            2: [game.key, game.sword]
-        }
-
-    def figure_out_their_locations(self):
-        self.chests_in_level.clear()
-        chest_ind = 0
-        for idx, wgt in dungeon.tiles.items():
-            btn = wgt[get_btn]
-            if btn['text'] == game.chest:
-                self.chests_in_level[chest_ind] = [dungeon.coords[idx], 'closed']
-                chest_ind += 1
-        #print(self.chests_in_level)
-
-    def open(self, coords):
-        try:
-            chest_index = list(self.chests_in_level.values()).index([coords, 'closed'])
-            btn_index = list(dungeon.coords.values()).index(coords)
-            self.chests_in_level[chest_index][getstate] = 'looted'
-            dungeon.tiles[btn_index][get_btn].config(fg='maroon')
-
-            # Gets specific item/s from contents of all chest dict first
-            #print(self.contents_all_chests[dungeon.level])
-            for item in self.contents_all_chests[dungeon.level]:
-                inv.pick_up_item(item)
-        except ValueError:
-            pass
-            #print('chest looted')
-            # print(f"Inventory slot {index}: {inv.inventory[index]['text']}\nButton: {inv.inventory[index]}")"""
-
-
 class Shadowcasting:
     def cast_light_in_octant(self, entity, entity_row, entity_col, radius, octant):
         shadowed_intervals = []
