@@ -67,12 +67,14 @@ stats_vertical_blank_frame = tk.Frame(stats_frame, height=200, bg='black')
 stats_horizontal_blank_frame = tk.Frame(stats_frame, width=50, bg='black')
 stats_hp_text = tk.Label(stats_frame, text='HP: XX/XX', font=large_font, bg='black', fg='white')
 stats_damage_text = tk.Label(stats_frame, text='Damage: X', font=large_font, bg='black', fg='white')
+stats_speed_text = tk.Label(stats_frame, text='Speed: XX', font=large_font, bg='black', fg='white')
 
 stats_horizontal_blank_frame.grid(row=0, column=0, rowspan=100, sticky='ew')
 stats_vertical_blank_frame.grid(row=0, column=2, sticky='ew')
 stats_header.grid(row=1, column=1, sticky='ew')
 stats_hp_text.grid(row=2, column=1, sticky='ew')
 stats_damage_text.grid(row=3, column=1, sticky='ew')
+stats_speed_text.grid(row=4, column=1, sticky='ew')
 
 inventory_frame = tk.Frame(big_right_frame, width=500, bg='black')
 horizontal_blank_frame = tk.Frame(big_right_frame, height=50, bg='black')
@@ -133,8 +135,9 @@ class GameController:
         if True:
             self.turn = 'player'
             self.player = '@'
-            self.sword = '⸸'
-            self.cool_sword = '⊰═]二フ'
+            self.dagger = '⸸'
+            self.shortsword = '⊰═]二フ'
+            self.whip = '𓍯𓂃𓂃'
             self.wall = ('▀▀ ▀▀ \n'
                          ' ▀▀ ▀▀\n'
                          '▀▀ ▀▀ \n'
@@ -157,6 +160,16 @@ class GameController:
                                 '⛓⛓  \n'
                                 ' ⛓ ⛓')
             self.exit_arrows = ['⏶', '⏴', '⏵', '⏷']
+            self.direction_arrows = {
+                'up_left': '↖',
+                'up': '↑',
+                'up_right': '↗',
+                'left': '←',
+                'down_left': '↙',
+                'down': '↓',
+                'down_right': '↘',
+                'right': '→',
+            }
             self.star = '✦'
             self.coin = '¤'
             self.zombie = 'Ψ'
@@ -168,12 +181,14 @@ class GameController:
 
         self.singular_interactable_items = [self.key, self.small_health_potion]
         self.enemies = [self.zombie]
-        self.weapons = [self.sword, self.cool_sword]
+        self.entities = [self.player, self.zombie]
+        self.weapons = [self.dagger, self.shortsword, self.whip]
         self.singular_interactable_items.extend(self.weapons)
 
-        self.solid_objects = [self.wall, self.chest, self.door, self.bars, self.locked_bars, self.player, self.rock, self.big_rock]
+        self.solid_objects = [self.wall, self.chest, self.door, self.bars, self.locked_bars, self.rock,
+                              self.big_rock]
         self.solid_objects.extend(self.singular_interactable_items)
-        self.solid_objects.extend(self.enemies)
+        self.solid_objects.extend(self.entities)
         self.solid_objects.extend(self.exit_arrows)
         self.opaque_objects = [self.wall, self.door]
 
@@ -270,7 +285,9 @@ class GameController:
                 text = self.small_health_potion
                 #fg = 'red'
             case 's':
-                text = self.cool_sword
+                text = self.shortsword
+            case '~':
+                text = self.whip
             case _:
                 text = tile_char
 
@@ -323,6 +340,7 @@ class GameController:
                         entity.prepare_action()
                     except RuntimeError:
                         print('entity does not exist')
+            #player.vision_changed = False
             player.render_vision()
             player.erase_highlight_from_prev_btn()
             for enemy in dungeon.current_enemies.values():
@@ -376,6 +394,13 @@ class GameController:
                     stats_hp_text['text'] = f'HP: {player.hp}/{player.max_hp}'
                 case 'damage':
                     stats_damage_text['text'] = f'Damage: {player.damage}'
+                case 'speed':
+                    stats_speed_text['text'] = f'Speed: {player.speed}'
+
+    def add_arrow_equivalent_to_looking_dir(self, entity, entity_tile, highlight_direction):
+        entity_tile[get_btn]['text'] = entity
+        arrow_used = self.direction_arrows[highlight_direction]
+        entity_tile[get_btn]['text'] += f'\n{arrow_used}'
 
 
 class Dungeon:
@@ -447,7 +472,7 @@ class Dungeon:
                                    "wbbbwbobwbbowb𝖇bw𝖇bbwoobooow\n"
                                    "wooowooowooowroowpoowoobooow\n"
                                    "wooowooowooowokrwooowoRwwwww\n"
-                                   "wooowooowoopwo@owooowoobooow\n"
+                                   "wooowooowoopw@oowooowoobooow\n"
                                    "wwwwwwwwwwwwwwwwwwwwworbooow\n"
                                    "wooowooowooowooowooowoobooow\n"
                                    "wooowoRowooowRoowooowoowwwww\n"
@@ -461,7 +486,7 @@ class Dungeon:
                     player.vision_radius = 3
                 self.level_text = ("wwwwwwwwwwwwwwwwwwwwwwwwwww\n"
                                    "wwwwwwwwwwwww@wwwwwwwwwwwww\n"
-                                   "wwwwwwwoooooosoooooowwwwwww\n"
+                                   "wwwwwwwooooo~osooooowwwwwww\n"
                                    "wwwwwwwowpwow𝖇wwowwowwwwwww\n"
                                    "wwwwwwwooooow⏷wooowowwwwwww\n"
                                    "wwwwwwwwowwowwwowooowwwwwww\n"
@@ -550,8 +575,7 @@ class Dungeon:
 
     @staticmethod
     def tile_is_blocked(the_tile):
-        return (the_tile['text'] == game.player or the_tile['text'] in game.enemies or the_tile[
-            'text'] in game.singular_interactable_items or the_tile['text'] in game.solid_objects)
+        return the_tile['text'] in game.solid_objects
 
     def go_to_new_location(self, entity, entity_coords, prev_entity_coords):
         new_tile = self.tiles_indexed_by_coords[tuple(entity_coords)][get_btn]
@@ -596,6 +620,7 @@ class Inventory:
         self.inventory = {}
         self.empty = ' '
         self.weapon_selected = False
+        self.weapon_just_selected = False
         row = 0
         col = 0
         for i in range(1, 11):
@@ -623,8 +648,9 @@ class Inventory:
                 self.influence_player_highlight()
                 if item == game.small_health_potion:
                     self.change_inventory_slot_fg(slot, item)
-                if item == game.cool_sword:
+                if item in [game.shortsword, game.whip]:
                     slot[get_btn]['font'] = small_font
+                    self.influence_player_highlight()
                 break
 
     def destroy_selected_item(self):
@@ -667,19 +693,19 @@ class Inventory:
         selected_item = self.selected_item_slot[get_btn]['text']
         if selected_item in game.weapons:
             self.weapon_selected = True
-            match selected_item:
-                case game.sword:
-                    player.damage = 1
-                case game.cool_sword:
-                    player.damage = 3
+            self.weapon_just_selected = True
+            player.damage = weapons.calculate_its_damage(selected_item, 2)
+            player.highlight_range = weapons.define_its_range(selected_item)
         else:
             self.weapon_selected = False
             player.damage = 0
+            player.highlight_range = weapons.define_its_range(selected_item)
 
         game.update_player_stats(['damage'])
 
-        player.determine_highlighted_color()
-        player.apply_highlight_to_button()
+        player.steps_to_take_after_pressing_looking_keys()
+
+        self.weapon_just_selected = False
 
     @staticmethod
     def change_inventory_slot_fg(slot, item):
@@ -699,7 +725,10 @@ class Player:
         self.prev_vision_direction = 'left'
 
         self.highlight_color = game.default_highlight_color
+        self.highlight_range = 1
+
         self.changed_location = False
+        self.vision_changed = True
 
         self.max_hp = 10
         self.hp = self.max_hp
@@ -718,7 +747,7 @@ class Player:
     def init_every_level(self):
         self.rendered_light_levels = {}
         self.prev_light_levels = {}
-        print(dungeon.tiles_indexed_by_coords)
+        #print(dungeon.tiles_indexed_by_coords)
         for coords, (frame, btn) in dungeon.tiles_indexed_by_coords.items():
             self.rendered_light_levels[(frame, btn)] = 0
             if btn['text'] == game.player:
@@ -728,14 +757,16 @@ class Player:
         dungeon.current_entities[len(dungeon.current_entities)] = self
         dungeon.speed_of_current_entities[self] = self.speed
         self.prev_coords = self.coords.copy()
-        self.highlighted_coords = self.coords.copy()
-        self.highlighted_tile = dungeon.tiles_indexed_by_coords[tuple(self.coords)]
-        self.prev_highlighted_coords = None
+        self.highlighted_coords_list = []
+        self.prev_highlighted_coords_list = []
+        self.highlighted_tile_list = []
+        self.prev_highlighted_tile_list = []
 
         self.determine_vision_direction()
         self.render_vision()
         self.determine_highlighted_button()
         self.apply_highlight_to_button()
+        game.add_arrow_equivalent_to_looking_dir(game.player, self.tile_itself, self.highlight_direction)
 
     def determine_vision_direction(self):
         self.prev_vision_direction = self.vision_direction
@@ -755,93 +786,117 @@ class Player:
 
         self.determine_highlighted_color()
 
-        self.prev_highlighted_coords = self.highlighted_coords.copy()
-        self.highlighted_coords = self.coords.copy()
+        self.prev_highlighted_coords_list = self.highlighted_coords_list.copy()
+        self.prev_highlighted_tile_list = self.highlighted_tile_list.copy()
+        self.highlighted_coords_list.clear()
+        self.highlighted_tile_list.clear()
 
-        match self.highlight_direction:
-            case 'up_left':
-                self.highlighted_coords[GET_ROW] -= 1
-                self.highlighted_coords[GET_COL] -= 1
-            case 'up':
-                self.highlighted_coords[GET_ROW] -= 1
-            case 'up_right':
-                self.highlighted_coords[GET_ROW] -= 1
-                self.highlighted_coords[GET_COL] += 1
-            case 'left':
-                self.highlighted_coords[GET_COL] -= 1
-            case 'right':
-                self.highlighted_coords[GET_COL] += 1
-            case 'down_left':
-                self.highlighted_coords[GET_ROW] += 1
-                self.highlighted_coords[GET_COL] -= 1
-            case 'down':
-                self.highlighted_coords[GET_ROW] += 1
-            case 'down_right':
-                self.highlighted_coords[GET_ROW] += 1
-                self.highlighted_coords[GET_COL] += 1
-            case 'self':
-                pass
-            case _:
-                return
+        self.current_highlighted_coords = self.coords.copy()
+        for i in range(self.highlight_range):
+            match self.highlight_direction:
+                case 'up_left':
+                    self.current_highlighted_coords[GET_ROW] -= 1
+                    self.current_highlighted_coords[GET_COL] -= 1
+                case 'up':
+                    self.current_highlighted_coords[GET_ROW] -= 1
+                case 'up_right':
+                    self.current_highlighted_coords[GET_ROW] -= 1
+                    self.current_highlighted_coords[GET_COL] += 1
+                case 'left':
+                    self.current_highlighted_coords[GET_COL] -= 1
+                case 'right':
+                    self.current_highlighted_coords[GET_COL] += 1
+                case 'down_left':
+                    self.current_highlighted_coords[GET_ROW] += 1
+                    self.current_highlighted_coords[GET_COL] -= 1
+                case 'down':
+                    self.current_highlighted_coords[GET_ROW] += 1
+                case 'down_right':
+                    self.current_highlighted_coords[GET_ROW] += 1
+                    self.current_highlighted_coords[GET_COL] += 1
+                case 'self':
+                    pass
+                case _:
+                    return
 
-        if self.highlighted_tile is not None:
-            self.prev_highlighted_tile = self.highlighted_tile[:]
-        if tuple(self.highlighted_coords) in dungeon.tiles_indexed_by_coords:
-            if not ((self.highlighted_coords[GET_ROW] or self.highlighted_coords[GET_ROW]) < 0 or
-                    self.highlighted_coords[GET_ROW] > dungeon.max_row or self.highlighted_coords[
-                        GET_COL] > dungeon.max_col):
-                self.highlighted_tile = dungeon.tiles_indexed_by_coords[tuple(self.highlighted_coords)]
-                return
+            if tuple(self.current_highlighted_coords) in dungeon.tiles_indexed_by_coords:
+                highlighted_tile = dungeon.tiles_indexed_by_coords[tuple(self.current_highlighted_coords)]
+                self.highlighted_tile_list.append(highlighted_tile)
+                #print(self.current_highlighted_coords)
+                self.highlighted_coords_list.append(self.current_highlighted_coords.copy())
 
-        self.highlighted_tile = None
+            #print(f'highlighted_tile_list: {self.highlighted_tile_list}, prev_highlighted_tile_list: {self.prev_highlighted_tile_list}')
+            #print(f'highlighted_coords_list: {self.highlighted_coords_list}, prev_highlighted_coords_list: {self.prev_highlighted_coords_list}')
 
     def determine_highlighted_color(self):
+        #print(self.highlight_direction)
         if self.attack_mode and inv.weapon_selected:
             self.highlight_color = game.attack_color
         else:
             self.highlight_color = game.default_highlight_color
 
     def apply_highlight_to_button(self):
-        if self.highlighted_tile is not None:
-            #print('highlighted!')
-            self.highlighted_tile[get_frame].configure(bg=self.highlight_color)
+        #print(self.highlighted_coords_list)
+        for highlighted_tile in self.highlighted_tile_list:
+            if highlighted_tile is not None:
+                #print('highlighted!')
+                highlighted_tile[get_frame].configure(bg=self.highlight_color)
 
     def erase_highlight_from_prev_btn(self):
-        light_level = self.rendered_light_levels[self.prev_highlighted_tile]
-        self.prev_highlighted_tile[get_frame].configure(bg=game.lighting_colors[light_level])
+        for prev_highlighted_tile in self.prev_highlighted_tile_list:
+            if prev_highlighted_tile is not None:
+                light_level = self.rendered_light_levels[prev_highlighted_tile]
+                prev_highlighted_tile[get_frame].configure(bg=game.lighting_colors[light_level])
 
     def interact(self):
         #('interaction')
-        interacted_tile = dungeon.tiles_indexed_by_coords[tuple(self.highlighted_coords)]
-        if self.rendered_light_levels[tuple(interacted_tile)] != 0:
+        interacted_tile_number = 0
+        prev_interacted_btn = None
+        prev_interacted_spots_list = []
+        prev_interacted_btns_list = []
+        for highlighted_coords in self.highlighted_coords_list:
+            interacted_tile = dungeon.tiles_indexed_by_coords[tuple(highlighted_coords)]
             interacted_btn = interacted_tile[get_btn]
             interacted_spot = interacted_btn['text']
-            print(f'interacted_spot: {interacted_spot}')
-            if interacted_spot == game.chest:
-                pass
-                #print('chest interaction')
-                #chest.open(self.btn_highlighted_coords)
-            elif (interacted_spot == game.locked_bars or interacted_spot == game.door) and \
-                    inv.selected_item_slot[get_btn]['text'] == game.key:
-                #print('locked bars interaction')
-                interacted_btn.config(text=' ')
-                inv.destroy_selected_item()
-            elif interacted_spot in game.exit_arrows:
-                #print('exited room')
-                dungeon.next_level()
-            elif interacted_spot in game.singular_interactable_items:
-                for item in game.singular_interactable_items:
-                    if item == game.small_health_potion:
-                        interacted_btn['fg'] = 'black'
-                    if item == interacted_spot:
-                        inv.pick_up_item(item)
-                        interacted_btn.config(text=' ')
-                        break
-            elif interacted_spot in game.enemies and self.attack_mode:
-                for enemy in dungeon.current_enemies.values():
-                    if enemy.tile_itself == interacted_tile:
-                        Combat(attacker=self, attacked=enemy)
-                        break
+            interacted_tile_number += 1
+            if self.rendered_light_levels[tuple(interacted_tile)] != 0:
+                print(f'interacted_spot: {interacted_spot}')
+                if prev_interacted_btn is not None and self.highlight_range > 1 and any(dungeon.tile_is_blocked(btn) for btn in prev_interacted_btns_list) and any(spot not in game.singular_interactable_items for spot in prev_interacted_spots_list) and self.attack_mode:
+                    print(f'blocked, {dungeon.tile_is_blocked(prev_interacted_btn)}')
+                    pass
+                elif interacted_spot == game.chest:
+                    pass
+                    #print('chest interaction')
+                    #chest.open(self.btn_highlighted_coords)
+                elif (interacted_spot == game.locked_bars or interacted_spot == game.door) and \
+                        inv.selected_item_slot[get_btn]['text'] == game.key:
+                    #print('locked bars interaction')
+                    interacted_btn.config(text=' ')
+                    inv.destroy_selected_item()
+                elif interacted_spot in game.exit_arrows:
+                    #print('exited room')
+                    dungeon.next_level()
+                elif interacted_spot in game.singular_interactable_items:
+                    for item in game.singular_interactable_items:
+                        if item == game.small_health_potion:
+                            interacted_btn['fg'] = 'black'
+                        if item == interacted_spot:
+                            inv.pick_up_item(item)
+                            interacted_btn.config(text=' ')
+                            break
+                elif any(enemy in interacted_spot for enemy in game.enemies) and self.attack_mode:
+                    for enemy in dungeon.current_enemies.values():
+                        if enemy.tile_itself == interacted_tile:
+                            distance_to_enemy = interacted_tile_number
+                            player.damage = weapons.calculate_its_damage(inv.selected_item_slot[get_btn]['text'],
+                                                                         distance_to_enemy)
+                            Combat(attacker=self, attacked=enemy)
+                            break
+            if self.highlight_range > 1:
+                prev_interacted_btn = interacted_btn
+                prev_interacted_spot = interacted_spot
+                prev_interacted_btns_list.append(prev_interacted_btn)
+                prev_interacted_spots_list.append(prev_interacted_spot)
 
     def consume_item(self):
         if inv.selected_item_slot[get_btn]['text'] == game.small_health_potion:
@@ -901,10 +956,6 @@ class Player:
                 case 'period':
                     self.highlight_direction = 'down_right'
 
-            if '_' in self.highlight_direction and inv.weapon_selected:
-                self.attack_mode = True
-            else:
-                self.attack_mode = False
             self.steps_to_take_after_pressing_looking_keys()
 
         elif key == 'e':
@@ -920,10 +971,21 @@ class Player:
         dungeon.go_to_new_location(game.player, self.coords, self.prev_coords)
         self.erase_highlight_from_prev_btn()
         self.apply_highlight_to_button()
+        game.add_arrow_equivalent_to_looking_dir(game.player, self.tile_itself, self.highlight_direction)
 
     def steps_to_take_after_pressing_looking_keys(self):
+        if '_' in self.highlight_direction and inv.weapon_selected:
+            self.attack_mode = True
+        else:
+            self.attack_mode = False
 
         self.determine_vision_direction()
+
+        if inv.weapon_just_selected:
+            self.determine_highlighted_button()
+            self.erase_highlight_from_prev_btn()
+            self.apply_highlight_to_button()
+            return
 
         if self.prev_highlight_direction != self.highlight_direction:
             self.determine_highlighted_button()
@@ -936,8 +998,9 @@ class Player:
         for enemy in dungeon.current_enemies.values():
             enemy.steps_to_highlight_button()
 
+        self.apply_highlight_to_button()
         if self.prev_highlight_direction != self.highlight_direction:
-            self.apply_highlight_to_button()
+            game.add_arrow_equivalent_to_looking_dir(game.player, self.tile_itself, self.highlight_direction)
 
     def determine_light_levels_of_tiles(self):
 
@@ -962,31 +1025,36 @@ class Player:
 
         new_light_levels = self.determine_light_levels_of_tiles()
 
-        for (frame, btn), new_light_level in new_light_levels.items():
-            old_light_level = self.prev_rendered_light_levels[(frame, btn)]
+        if self.vision_changed:
+            for (frame, btn), new_light_level in new_light_levels.items():
+                old_light_level = self.prev_rendered_light_levels[(frame, btn)]
 
-            if new_light_level == old_light_level:
-                continue
+                if new_light_level == old_light_level:
+                    continue
 
-            tile_color = game.lighting_colors[new_light_level]
+                tile_color = game.lighting_colors[new_light_level]
 
-            frame.configure(bg=tile_color)
-            if btn['text'] != game.small_health_potion:
-                btn.configure(bg=tile_color, fg='black')
-            else:
-                btn.configure(bg=tile_color, fg='red')
-
-            self.rendered_light_levels[(frame, btn)] = new_light_level
-
-        for (frame, btn), _ in self.prev_light_levels.items():
-            if (frame, btn) not in new_light_levels:
-                tile_color = game.lighting_colors[0]
                 frame.configure(bg=tile_color)
-                btn.configure(bg=tile_color, fg='black')
+                if btn['text'] != game.small_health_potion:
+                    btn.configure(bg=tile_color, fg='black')
+                else:
+                    btn.configure(bg=tile_color, fg='red')
 
-                self.rendered_light_levels[(frame, btn)] = 0
+                self.rendered_light_levels[(frame, btn)] = new_light_level
+
+            for (frame, btn), _ in self.prev_light_levels.items():
+                if (frame, btn) not in new_light_levels:
+                    tile_color = game.lighting_colors[0]
+                    frame.configure(bg=tile_color)
+                    btn.configure(bg=tile_color, fg='black')
+
+                    self.rendered_light_levels[(frame, btn)] = 0
+        else:
+            self.rendered_light_levels = new_light_levels.copy()
 
         self.prev_light_levels = new_light_levels.copy()
+
+        self.vision_changed = True
 
     def kill_self(self):
         pass
@@ -1055,10 +1123,40 @@ class Enemy:
         entity_row, entity_col = self.coords
         player_row, player_col = player.coords
 
-        if abs(player_row - entity_row) > abs(player_col - entity_col):
-            self.highlight_direction = 'down' if player_row > entity_row else 'up'
+        player_more_vertical = abs(player_row - entity_row) > abs(player_col - entity_col)
+
+        if player_more_vertical:
+            initial_temp_dir = 'down' if player_row > entity_row else 'up'
         else:
-            self.highlight_direction = 'right' if player_col > entity_col else 'left'
+            initial_temp_dir = 'right' if player_col > entity_col else 'left'
+
+        self.figure_out_potential_coords(initial_temp_dir)
+        temp_row, temp_col = self.potential_coords
+        tile_btn = dungeon.tiles_indexed_by_coords[(temp_row, temp_col)][get_btn]
+        #print(f'temp: {initial_temp_dir}, {tile_btn['text']}')
+        if not dungeon.tile_is_blocked(tile_btn):
+            self.highlight_direction = initial_temp_dir
+            return
+        else:
+            if player_more_vertical:
+                temp_directions = horizontal_directions.copy()
+            else:
+                temp_directions = vertical_directions.copy()
+
+            random.shuffle(temp_directions)
+
+            for temp_dir in temp_directions:
+                #print(f'tempy: {temp_dir}')
+                self.figure_out_potential_coords(temp_dir)
+                temp_row, temp_col = self.potential_coords
+                if (temp_row, temp_col) not in dungeon.tiles_indexed_by_coords:
+                    continue
+                tile_btn = dungeon.tiles_indexed_by_coords[(temp_row, temp_col)][get_btn]
+                if not dungeon.tile_is_blocked(tile_btn):
+                    self.highlight_direction = temp_dir
+                    #print('yay')
+                    return
+        return
 
     def determine_highlight_color(self):
         match self.state:
@@ -1136,16 +1234,13 @@ class Enemy:
                 return
 
     def apply_highlight_to_button(self):
-        if self.highlighted_tile != player.highlighted_tile:
-            frame, btn = self.highlighted_tile
-            frame.configure(bg=self.highlight_color)
+        frame, btn = self.highlighted_tile
+        frame.configure(bg=self.highlight_color)
 
     def erase_highlight_from_prev_btn(self):
-        if not (
-                 self.prev_highlighted_tile == player.highlighted_tile or self.highlighted_tile == player.highlighted_tile):
-            light_level = player.rendered_light_levels.get(self.prev_highlighted_tile, 0)
-            self.prev_highlighted_tile[get_frame].configure(bg=game.lighting_colors[light_level])
-            #print(self.prev_coords, player.rendered_light_levels.get(self.prev_highlighted_tile, 0))
+        light_level = player.rendered_light_levels.get(self.prev_highlighted_tile, 0)
+        self.prev_highlighted_tile[get_frame].configure(bg=game.lighting_colors[light_level])
+        #print(self.prev_coords, player.rendered_light_levels.get(self.prev_highlighted_tile, 0))
 
     def steps_to_highlight_button(self):
         self.check_self_visibility_and_highlight_status()
@@ -1157,6 +1252,8 @@ class Enemy:
         if self.do_highlight:
             self.determine_highlight_color()
             self.apply_highlight_to_button()
+
+        game.add_arrow_equivalent_to_looking_dir(self.enemy_type, self.tile_itself, self.highlight_direction)
 
         self.potential_coords = []
 
@@ -1248,7 +1345,7 @@ class Zombie(Enemy):
 
     def prepare_action(self):
         self.update_state()
-        print(f'state: {self.state}')
+        #print(f'state: {self.state}')
 
         match self.state:
             case 'idle':
@@ -1263,11 +1360,9 @@ class Zombie(Enemy):
 
             # If state = freeze, do nothing
 
-        self.steps_to_highlight_button()
-
     def action(self):
         self.determine_vision_direction()
-        print(f'statey: {self.state}')
+        #print(f'statey: {self.state}')
         if self.state == 'idle' or self.state == 'aggro':
             self.prev_coords = self.coords.copy()
             self.coords = dungeon.find_new_location(
@@ -1372,6 +1467,41 @@ class Combat:
 
         if attacked.hp <= 0:
             attacked.kill_self()
+
+
+class Weapons:
+    def define_its_range(self, weapon):
+        match weapon:
+            case game.dagger:
+                self.weapon_range = 1
+            case game.shortsword:
+                self.weapon_range = 2
+            case game.whip:
+                self.weapon_range = 3
+            case _:
+                self.weapon_range = 1
+
+        return self.weapon_range
+
+    def calculate_its_damage(self, weapon, enemy_distance):
+        # print(enemy_distance)
+        match weapon:
+            case game.dagger:
+                self.damage = 2
+            case game.shortsword:
+                self.damage = 3
+            case game.whip:
+                match enemy_distance:
+                    case 1:
+                        self.damage = 1
+                    case 2:
+                        self.damage = 5
+                    case 3:
+                        self.damage = 10
+            case _:
+                self.damage = 1
+
+        return self.damage
 
 
 """class Chest:
@@ -1504,8 +1634,9 @@ vision = Shadowcasting()
 dungeon = Dungeon()
 inv = Inventory()
 player = Player()
+weapons = Weapons()
 dungeon.locate_important_objects_and_entities()
-game.update_player_stats(['hp', 'damage'])
+game.update_player_stats(['hp', 'damage', 'speed'])
 dungeon.finished_loading = True
 
 

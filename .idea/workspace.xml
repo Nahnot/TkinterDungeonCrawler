@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="Added player stats, a health potion, and a cool sword.">
+    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="FINALLY FIXED ENEMY BY UPDATING VISION DIRECTION BEFORE ACTION AHHHHHH. Also made zombie sidestep when u orthogonally adjacent to it. If it can't, it will slide back.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
@@ -389,7 +389,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777753524998</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="FINALLY FIXED ENEMY BY UPDATING VISION DIRECTION BEFORE ACTION AHHHHHH. Also made zombie sidestep when u orthogonally adjacent to it. If it can't, it will slide back.">
+      <option name="closed" value="true" />
+      <created>1777765259452</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1777765259452</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -429,6 +437,7 @@
     <MESSAGE value="Essentially, I made enemies not buggy when they die. That's pretty much it." />
     <MESSAGE value="I fixed some things that got unfixed somehow idk man" />
     <MESSAGE value="Added player stats, a health potion, and a cool sword." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added player stats, a health potion, and a cool sword." />
+    <MESSAGE value="FINALLY FIXED ENEMY BY UPDATING VISION DIRECTION BEFORE ACTION AHHHHHH. Also made zombie sidestep when u orthogonally adjacent to it. If it can't, it will slide back." />
+    <option name="LAST_COMMIT_MESSAGE" value="FINALLY FIXED ENEMY BY UPDATING VISION DIRECTION BEFORE ACTION AHHHHHH. Also made zombie sidestep when u orthogonally adjacent to it. If it can't, it will slide back." />
   </component>
 </project>
