@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="FINALLY FIXED ENEMY BY UPDATING VISION DIRECTION BEFORE ACTION AHHHHHH. Also made zombie sidestep when u orthogonally adjacent to it. If it can't, it will slide back.">
+    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="Removed the large comment that contained chest class">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
@@ -397,7 +397,23 @@
       <option name="project" value="LOCAL" />
       <updated>1777765259452</updated>
     </task>
-    <option name="localTasksCounter" value="32" />
+    <task id="LOCAL-00032" summary="Made player be able to have bigger highlight range. Thank God I figured out how to add that and fix any issues with it in about 2 hours. Added weapon class to easily handle any weapons I can think of. I added a whip; and it's damage increases as distance from player increases, with a max distance of 3. Renamed sword to dagger, and cool sword to shortsword. Finally, added direction arrows for all entities so that you know what they're looking at.">
+      <option name="closed" value="true" />
+      <created>1777858496391</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1777858496391</updated>
+    </task>
+    <task id="LOCAL-00033" summary="Removed the large comment that contained chest class">
+      <option name="closed" value="true" />
+      <created>1777858548972</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1777858548972</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -438,6 +454,8 @@
     <MESSAGE value="I fixed some things that got unfixed somehow idk man" />
     <MESSAGE value="Added player stats, a health potion, and a cool sword." />
     <MESSAGE value="FINALLY FIXED ENEMY BY UPDATING VISION DIRECTION BEFORE ACTION AHHHHHH. Also made zombie sidestep when u orthogonally adjacent to it. If it can't, it will slide back." />
-    <option name="LAST_COMMIT_MESSAGE" value="FINALLY FIXED ENEMY BY UPDATING VISION DIRECTION BEFORE ACTION AHHHHHH. Also made zombie sidestep when u orthogonally adjacent to it. If it can't, it will slide back." />
+    <MESSAGE value="Made player be able to have bigger highlight range. Thank God I figured out how to add that and fix any issues with it in about 2 hours. Added weapon class to easily handle any weapons I can think of. I added a whip; and it's damage increases as distance from player increases, with a max distance of 3. Renamed sword to dagger, and cool sword to shortsword. Finally, added direction arrows for all entities so that you know what they're looking at." />
+    <MESSAGE value="Removed the large comment that contained chest class" />
+    <option name="LAST_COMMIT_MESSAGE" value="Removed the large comment that contained chest class" />
   </component>
 </project>
