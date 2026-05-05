@@ -44,6 +44,7 @@ window.geometry(f"{WIDTH}x{HEIGHT}+{HORIZONTAL_OFFSET}+{VERTICAL_OFFSET}")
 
 super_small_font = font.Font(family="Courier", size=13)
 small_font = font.Font(family="Courier", size=15)
+medium_font = font.Font(family="Courier", size=17)
 large_font = font.Font(family="Courier", size=20)
 very_large_font = font.Font(family="Courier", size=30)
 bold_large_font = font.Font(family="Courier", size=20, weight='bold')
@@ -56,25 +57,35 @@ big_right_frame.grid(row=0, column=1, sticky='ns')
 
 #equipment_frame = tk.Frame(big_left_frame, width=450, height=1080 / 2, bg='black')
 stats_frame = tk.Frame(big_left_frame, bg='black')
-big_left_frame_horizontal_blank_frame = tk.Frame(big_left_frame, width=100, bg='black')
+big_left_frame_horizontal_blank_frame = tk.Frame(big_left_frame, width=50, bg='black')
 
 #equipment_frame.grid(row=0, column=0, sticky='ns')
-stats_frame.grid(row=0, column=0, sticky='ew')
+stats_frame.grid(row=0, column=0)
 big_left_frame_horizontal_blank_frame.grid(row=0, column=1, sticky='ew')
 
 stats_header = tk.Label(stats_frame, text='Stats:', font=bold_large_font, bg='black', fg='white')
 stats_vertical_blank_frame = tk.Frame(stats_frame, height=200, bg='black')
 stats_horizontal_blank_frame = tk.Frame(stats_frame, width=50, bg='black')
-stats_hp_text = tk.Label(stats_frame, text='HP: XX/XX', font=large_font, bg='black', fg='white')
-stats_damage_text = tk.Label(stats_frame, text='Damage: X', font=large_font, bg='black', fg='white')
-stats_speed_text = tk.Label(stats_frame, text='Speed: XX', font=large_font, bg='black', fg='white')
+stats_hp_text = tk.Label(stats_frame, text='HP: XX/XX', font=medium_font, bg='black', fg='white', width=16, anchor='w')
+stats_damage_text = tk.Label(stats_frame, text='Damage: XX-XX', font=medium_font, bg='black', fg='white', width=16, anchor='w')
+stats_speed_text = tk.Label(stats_frame, text='Speed: XX', font=medium_font, bg='black', fg='white', width=16, anchor='w')
+stats_crit_chance_text = tk.Label(stats_frame, text='Crit Chance: XX%', font=medium_font, bg='black', fg='white', width=16, anchor='w')
+stats_crit_multiplier_text = tk.Label(stats_frame, text='Crit Mult: XXx', font=medium_font, bg='black', fg='white', width=16, anchor='w')
+stats_miss_chance_text = tk.Label(stats_frame, text='Miss Chance: XX%', font=medium_font, bg='black', fg='white', width=16, anchor='w')
+stats_text_list = [stats_hp_text, stats_damage_text, stats_speed_text, stats_crit_chance_text, stats_crit_multiplier_text, stats_miss_chance_text]
 
 stats_horizontal_blank_frame.grid(row=0, column=0, rowspan=100, sticky='ew')
 stats_vertical_blank_frame.grid(row=0, column=2, sticky='ew')
 stats_header.grid(row=1, column=1, sticky='ew')
-stats_hp_text.grid(row=2, column=1, sticky='ew')
-stats_damage_text.grid(row=3, column=1, sticky='ew')
-stats_speed_text.grid(row=4, column=1, sticky='ew')
+stats_hp_text.grid(row=2, column=1)
+stats_damage_text.grid(row=3, column=1)
+stats_speed_text.grid(row=4, column=1)
+stats_crit_chance_text.grid(row=5, column=1)
+stats_crit_multiplier_text.grid(row=6, column=1)
+stats_miss_chance_text.grid(row=7, column=1)
+
+for text in stats_text_list:
+    text.grid_propagate(False)
 
 inventory_frame = tk.Frame(big_right_frame, width=500, bg='black')
 horizontal_blank_frame = tk.Frame(big_right_frame, height=50, bg='black')
@@ -187,12 +198,14 @@ class GameController:
         self.weapons = [self.dagger, self.shortsword, self.whip]
         self.singular_interactable_items.extend(self.weapons)
 
-        self.solid_objects = [self.wall, self.chest, self.door, self.bars, self.locked_bars, self.rock,
-                              self.big_rock]
-        self.solid_objects.extend(self.singular_interactable_items)
-        self.solid_objects.extend(self.entities)
-        self.solid_objects.extend(self.exit_arrows)
-        self.opaque_objects = [self.wall, self.door]
+        # solid and opaque objects
+        if True:
+            self.solid_objects = [self.wall, self.chest, self.door, self.bars, self.locked_bars, self.rock, self.big_rock]
+            self.solid_objects.extend(self.singular_interactable_items)
+            self.solid_objects.extend(self.entities)
+            self.solid_objects.extend(self.exit_arrows)
+            self.opaque_objects = [self.wall, self.door]
+            #print(self.solid_objects)
 
         self.default_color = '#f0f0f0'
 
@@ -222,6 +235,7 @@ class GameController:
         self.game_log_text = ""
 
         self.entered_new_level = False
+        self.updated_game_log_this_turn = False
 
         self.make_log()
 
@@ -259,7 +273,7 @@ class GameController:
 
         # Map dungeon glyphs to rendered text/colors
         match tile_char:
-            case 'o':
+            case '-':
                 text = ' '
             case '@':
                 text = self.player
@@ -326,6 +340,7 @@ class GameController:
         return btn
 
     def advance_turn(self, player_action):
+        game.updated_game_log_this_turn = False
         try:
             for entity, speed in dungeon.ordered_speed_of_current_entities.items():
                 if entity == player:
@@ -348,7 +363,11 @@ class GameController:
             player.erase_highlight_from_prev_btn()
             for enemy in dungeon.current_enemies.values():
                 enemy.steps_to_highlight_button()
+                if player.attack_mode and enemy.coords in player.highlighted_coords_list:
+                    player.miss_chance = (enemy.speed / player.speed) * 10
+                    game.update_player_stats(['miss chance'])
             player.apply_highlight_to_button()
+            game.update_log('add turn division', None)
         except RuntimeError:
             print('entity does not exist')
 
@@ -364,6 +383,8 @@ class GameController:
         self.game_log.grid(row=0, column=0)
 
     def update_log(self, event_type, event_objects):
+        if event_type == 'add turn division' and not self.updated_game_log_this_turn:
+            return
         if event_type == 'item picked up':
             if event_objects == game.small_health_potion:
                 event_objects = 'Small Health Potion'
@@ -376,10 +397,19 @@ class GameController:
         elif event_type == 'combat':
             attacker, attacked, damage = event_objects
             text = f"{attacker} hit {attacked} for {damage} damage!\n"
+        elif event_type == 'missed attack':
+            attacker, attacked = event_objects
+            text = f"{attacker} missed {attacked}!\n"
+        elif event_type == 'killed entity':
+            attacker, attacked = event_objects
+            text = f"{attacker} {random.choice(['murdered', 'killed', 'exsanguinated', 'slayed', 'dispatched', 'took care of', 'executed', 'slaughtered', 'felled', 'took out', 'annihilated', 'blotted out', 'removed', 'terminated', 'exterminated', 'neutralized', 'liquidated', 'erased', 'obliterated', 'wasted'])} {attacked}!\n"
+        elif event_type == 'add turn division':
+            text = '\n-----------------------------\n\n'
         self.game_log['state'] = 'normal'
         # noinspection PyUnboundLocalVariable
         self.game_log.insert('1.0', text)
         self.game_log['state'] = 'disabled'
+        self.updated_game_log_this_turn = True
 
     def pass_action(self):
         pass
@@ -396,9 +426,20 @@ class GameController:
                 case 'hp':
                     stats_hp_text['text'] = f'HP: {player.hp}/{player.max_hp}'
                 case 'damage':
-                    stats_damage_text['text'] = f'Damage: {player.damage}'
+                    minimum_damage = weapons.damage_extremes[player.weapon_equipped][0]
+                    maximum_damage = weapons.damage_extremes[player.weapon_equipped][-1]
+                    if minimum_damage != maximum_damage:
+                        stats_damage_text['text'] = f'Damage: {minimum_damage}-{maximum_damage}'
+                    else:
+                        stats_damage_text['text'] = f'Damage: {minimum_damage}'
                 case 'speed':
                     stats_speed_text['text'] = f'Speed: {player.speed}'
+                case 'crit chance':
+                    stats_crit_chance_text['text'] = f'Crit Chance: {player.crit_chance}%'
+                case 'crit multiplier':
+                    stats_crit_multiplier_text['text'] = f'Crit Mult: {player.crit_multiplier}x'
+                case 'miss chance':
+                    stats_miss_chance_text['text'] = f'Miss Chance: {player.miss_chance}%'
 
     def add_arrow_equivalent_to_looking_dir(self, entity, entity_tile, highlight_direction):
         entity_tile[get_btn]['text'] = entity
@@ -430,6 +471,7 @@ class Dungeon:
         if True:
             self.tiles_indexed_by_coords = {}
             self.coords_indexed_by_tiles = {}
+            self.tile_contents_indexed_by_coords = {}
 
             self.max_row = 0
             self.max_col = 0
@@ -447,65 +489,65 @@ class Dungeon:
         match self.level:
             case -9999:
                 self.level_text = ("wwwwwwwwwwwwwwwwwwwwwwwwwww\n"
-                                   "woooooooooooo\n"
-                                   "wooooooowoo@o\n"
-                                   "wooowooooooow\n"
-                                   "wooooooooooow\n"
-                                   "woooooooooooo\n"
-                                   "woooooooooooo\n"
-                                   "woooooooooooo\n"
-                                   "woooooooooooo\n"
-                                   "woooooooooooo\n"
+                                   "w------------\n"
+                                   "w-------w--@-\n"
+                                   "w---w-------w\n"
+                                   "w-----------w\n"
+                                   "w------------\n"
+                                   "w------------\n"
+                                   "w------------\n"
+                                   "w------------\n"
+                                   "w------------\n"
                                    "wwwwwwwwwwwww\n"
                                    "wwwwwwwwwwwww\n"
                                    "wwwwwwwwwwwww\n"
                                    "wwwwwwwwwwwww\n")
             case -2:
                 self.level_text = ("wwwwwwwwwwwwwwww\n"
-                                   "woooooooooooooow\n"
-                                   "wooooooowoooooow\n"
-                                   "wooowooooozowoow\n"
-                                   "woo@⸸ooooooowoow\n"
-                                   "woooooooooooooow\n"
+                                   "w--------------w\n"
+                                   "w-------w------w\n"
+                                   "w---w-----z-w--w\n"
+                                   "w--@⸸-------w--w\n"
+                                   "w--------------w\n"
                                    "wwwwwwwwwwwwwwww")
             case 1:
                 self.level_text = ("wwwwwwwwwwwwwwwwwwwwwwwwwwww\n"
-                                   "wooRroRoooooooRorooooRkwwwww\n"
-                                   "wooooooooooooooooooooorbooow\n"
-                                   "wbbbwbobwbbowb𝖇bw𝖇bbwoobooow\n"
-                                   "wooowooowooowroowpoowoobooow\n"
-                                   "wooowooowooowokrwooowoRwwwww\n"
-                                   "wooowooowoopw@oowooowoobooow\n"
-                                   "wwwwwwwwwwwwwwwwwwwwworbooow\n"
-                                   "wooowooowooowooowooowoobooow\n"
-                                   "wooowoRowooowRoowooowoowwwww\n"
-                                   "woozwooowzorwoorwRrowoobooow\n"
-                                   "wboowooowboowooowoobwoobooow\n"
-                                   "⏴oooooorooooooooooooooobooow\n"
-                                   "⏴ooooooooooRoooRooooooowwwww\n"
+                                   "w--Rr-R-------R-r----Rkwwwww\n"
+                                   "w---------------------rb---w\n"
+                                   "wbbbwb-bwbb-wb𝖇bw𝖇bbw--b---w\n"
+                                   "w---w---w---wr--wp--w--b---w\n"
+                                   "w---w---w---w-krw---w-Rwwwww\n"
+                                   "w---w---w--pw@--w---w--b---w\n"
+                                   "wwwwwwwwwwwwwwwwwwwww-rb---w\n"
+                                   "w---w---w---w---w---w--b---w\n"
+                                   "w---w-R-w---wR--w---w--wwwww\n"
+                                   "w--zw---wz-rw--rwRr-w--b---w\n"
+                                   "wb--w---wb--w---w--bw--b---w\n"
+                                   "⏴------r---------------b---w\n"
+                                   "⏴----------R---R-------wwwww\n"
                                    "wwwwwwwwwwwwwwwwwwwwwwwwwwww\n")
             case 2:
                 if not game.testing:
                     player.vision_radius = 3
                 self.level_text = ("wwwwwwwwwwwwwwwwwwwwwwwwwww\n"
                                    "wwwwwwwwwwwww@wwwwwwwwwwwww\n"
-                                   "wwwwwwwooooo~⸸sooooowwwwwww\n"
-                                   "wwwwwwwowowow𝖇wwowwowwwwwww\n"
-                                   "wwwwwwwooooow⏷wooowowwwwwww\n"
-                                   "wwwwwwwwowwowwwowooowwwwwww\n"
-                                   "wwwwwwwwoooooooowwowwwwwwww\n"
-                                   "wwwwwwwoowowwwwoooowwwwwwww\n"
-                                   "wwwwwwwowwoooowoooowwwwwwww\n"
-                                   "wwwwwwwoooowwooooowwwwwwwww\n"
-                                   "wwwwwwwwwwwwwwwozzwwwwwwwww\n"
-                                   "wwwwwwwwwwwwwwwzzowwwwwwwww\n"
-                                   "wwwwwwwwwwwwwwwokowwwwwwwww\n"
+                                   "wwwwwww-----~⸸s-----wwwwwww\n"
+                                   "wwwwwww-w-w-w𝖇ww-ww-wwwwwww\n"
+                                   "wwwwwww-----w⏷w---w-wwwwwww\n"
+                                   "wwwwwwww-ww-www-w---wwwwwww\n"
+                                   "wwwwwwww--------ww-wwwwwwww\n"
+                                   "wwwwwww--w-wwww----wwwwwwww\n"
+                                   "wwwwwww-ww----w----wwwwwwww\n"
+                                   "wwwwwww----ww-----wwwwwwwww\n"
+                                   "wwwwwwwwwwwwwww-zzwwwwwwwww\n"
+                                   "wwwwwwwwwwwwwwwzz-wwwwwwwww\n"
+                                   "wwwwwwwwwwwwwww-k-wwwwwwwww\n"
                                    "wwwwwwwwwwwwwwwwwwwwwwwwwww\n")
             case 9999:
                 self.level_text = ("wwwwwwwwwwww\n"
-                                   "p⸸oooowwwwww\n"
-                                   "woocoooozooe\n"
-                                   "wooooowwwwww\n"
+                                   "p⸸----wwwwww\n"
+                                   "w--c----z--e\n"
+                                   "w-----wwwwww\n"
                                    "wwwwwwwwwwww")
             case _:
                 window.destroy()
@@ -514,6 +556,7 @@ class Dungeon:
         # Clear old widgets
         self.tiles_indexed_by_coords.clear()
         self.coords_indexed_by_tiles.clear()
+        self.tile_contents_indexed_by_coords.clear()
         self.current_enemies.clear()
 
         row = 0
@@ -577,8 +620,8 @@ class Dungeon:
         return entity_coords
 
     @staticmethod
-    def tile_is_blocked(the_tile):
-        return the_tile['text'] in game.solid_objects
+    def tile_is_blocked(the_btn):
+        return any(solid_obj in the_btn['text'] for solid_obj in game.solid_objects)
 
     def go_to_new_location(self, entity, entity_coords, prev_entity_coords):
         new_tile = self.tiles_indexed_by_coords[tuple(entity_coords)][get_btn]
@@ -654,6 +697,7 @@ class Inventory:
                     self.change_inventory_slot_fg(slot, item)
                 if item in [game.shortsword, game.whip]:
                     slot[get_btn]['font'] = small_font
+                if item in game.weapons:
                     self.influence_player_highlight()
                 break
 
@@ -667,6 +711,9 @@ class Inventory:
     def select_item(self, slot):
         self.prev_selected_item_slot = self.selected_item_slot
         self.selected_item_slot = slot
+
+        self.prev_inv_number_pressed = self.inv_number_pressed
+        self.inv_number_pressed = next((key for key, value in self.inventory.items() if value == self.selected_item_slot), None)
 
         #print(self.selected_item_slot)
         """for slot_ind, slot in self.inventory.items():
@@ -703,14 +750,14 @@ class Inventory:
         if selected_item in game.weapons:
             self.weapon_selected = True
             self.weapon_just_selected = True
-            player.damage = weapons.calculate_its_damage(selected_item, 2)
-            player.highlight_range = weapons.define_its_range(selected_item)
+            player.weapon_equipped = selected_item
         else:
             self.weapon_selected = False
-            player.damage = 0
-            player.highlight_range = weapons.define_its_range(selected_item)
+            player.weapon_equipped = None
 
-        game.update_player_stats(['damage'])
+        player.highlight_range, player.crit_chance, player.crit_multiplier, player.speed = weapons.adjust_stats(selected_item)
+
+        game.update_player_stats(['damage', 'crit chance', 'crit multiplier', 'speed', 'miss_chance'])
 
         player.steps_to_take_after_pressing_looking_keys()
 
@@ -739,14 +786,21 @@ class Player:
         self.changed_location = False
         self.vision_changed = True
 
-        self.max_hp = 10
+        self.max_hp = 15
         self.hp = self.max_hp
-        self.speed = 10
+        self.normal_speed = 10
+        self.speed = self.normal_speed
         self.damage = 0
+        self.crit_chance = 0
+        self.crit_multiplier = 0
+        # This 20 means 20%
+        self.miss_chance = 0
         if not game.testing:
             self.vision_radius = 2
         else:
             self.vision_radius = 5
+
+        self.weapon_equipped = None
 
         self.highlighting_diagonally_adjacent_tile = False  # an entity can only attack diagonals
         self.attack_mode = False
@@ -899,8 +953,8 @@ class Player:
                     for enemy in dungeon.current_enemies.values():
                         if enemy.tile_itself == interacted_tile:
                             distance_to_enemy = interacted_tile_number
-                            player.damage = weapons.calculate_its_damage(inv.selected_item_slot[get_btn]['text'],
-                                                                         distance_to_enemy)
+                            self.damage = weapons.calculate_its_damage(inv.selected_item_slot[get_btn]['text'], distance_to_enemy)
+                            print('player attack')
                             Combat(attacker=self, attacked=enemy)
                             break
             if self.highlight_range > 1:
@@ -1008,6 +1062,9 @@ class Player:
 
         for enemy in dungeon.current_enemies.values():
             enemy.steps_to_highlight_button()
+            if self.attack_mode and enemy.coords in self.highlighted_coords_list:
+                self.miss_chance = (enemy.speed / self.speed) * 10
+                game.update_player_stats(['miss chance'])
 
         self.apply_highlight_to_button()
         if self.prev_highlight_direction != self.highlight_direction:
@@ -1055,7 +1112,7 @@ class Player:
 
             for (frame, btn), _ in self.prev_light_levels.items():
                 if (frame, btn) not in new_light_levels:
-                    tile_color = game.lighting_colors[-1]
+                    tile_color = game.lighting_colors[0]
                     frame.configure(bg=tile_color)
                     btn.configure(bg=tile_color)
 
@@ -1075,6 +1132,7 @@ class Enemy:
     def __init__(self, enemy_type, row, col):
         self.coords = [row, col]
         self.prev_coords = self.coords.copy()
+        self.last_rendered_coords = self.coords.copy()
         self.potential_coords = []
         self.tile_itself = dungeon.tiles_indexed_by_coords[tuple(self.coords.copy())]
 
@@ -1123,7 +1181,7 @@ class Enemy:
 
     def check_self_visibility_and_highlight_status(self):
         self.prev_visible_to_player = self.is_visible_to_player
-        if player.rendered_light_levels.get(self.tile_itself, 0) != 0:
+        if player.rendered_light_levels.get(self.tile_itself, 0) > 0:
             self.is_visible_to_player = True
             self.do_highlight = True
         else:
@@ -1320,8 +1378,12 @@ class Zombie(Enemy):
         self.hp = self.max_hp
         self.vision_radius = 4
         self.movement_length = 1
-        self.damage = 1
-        self.speed = 5
+        self.damage_range = [1, 2, 3]
+        self.damage = None
+        self.speed = 2
+        self.crit_chance = 10
+        self.crit_multiplier = 1.5
+        self.miss_chance = None
 
         self.vision_pattern_type = 'zombie_vision'
 
@@ -1384,8 +1446,8 @@ class Zombie(Enemy):
                 self.prev_coords,
                 self.vision_direction
             )
-            dungeon.go_to_new_location(game.zombie, self.coords, self.prev_coords)
             self.tile_itself = dungeon.tiles_indexed_by_coords[tuple(self.coords)]
+            dungeon.go_to_new_location(game.zombie, self.coords, self.prev_coords)
         elif self.state == 'attack':
             self.attack_player()
 
@@ -1465,54 +1527,103 @@ class Zombie(Enemy):
         self.highlight_direction = direction_map[(row_step, col_step)]
 
     def attack_player(self):
-        if self.highlighted_tile[get_btn]['text'] == game.player:
+        if self.highlighted_coords == player.coords:
+            print('enemy attack')
+            self.damage = random.choice(self.damage_range)
+            self.miss_chance = (player.speed / self.speed) * 10
             Combat(attacker=self, attacked=player)
 
 
 class Combat:
     def __init__(self, attacker, attacked):
-        attacked.hp -= attacker.damage
+        rng = random.randint(1, 101)
+        rng2 = random.randint(1, 101)
+        rng3 = random.randint(1, 101)
+        chosen_rng = random.choice([rng, rng2, rng3])
+        if attacker.miss_chance >= chosen_rng:
+            if isinstance(attacker, Enemy):
+                game.update_log('missed attack', [attacker.enemy_type, 'you'])
+            else:
+                game.update_log('missed attack', ['You', attacked.enemy_type])
+            return
+
+        attacker_damage = attacker.damage
+        if attacker.crit_chance >= chosen_rng:
+            attacker_damage *= attacker.crit_multiplier
+        attacked.hp -= attacker_damage
+        print(attacker, attacked)
         if isinstance(attacker, Enemy):
-            game.update_log('combat', [attacker.enemy_type, 'you', attacker.damage])
+            game.update_log('combat', [attacker.enemy_type, 'you', attacker_damage])
             game.update_player_stats(['hp'])
         else:
-            game.update_log('combat', ['You', attacked.enemy_type, attacker.damage])
+            game.update_log('combat', ['You', attacked.enemy_type, attacker_damage])
 
         if attacked.hp <= 0:
             attacked.kill_self()
+            if isinstance(attacker, Enemy):
+                game.update_log('killed entity', [attacker.enemy_type, 'you'])
+            else:
+                game.update_log('killed entity', ['You', attacked.enemy_type])
 
 
 class Weapons:
-    def define_its_range(self, weapon):
+    def __init__(self):
+        self.damage_dictionary = {
+            game.dagger: [3, 4, 5],
+            game.shortsword: [2, 3, 4],
+            # Index of game.whip dict is enemy distance
+            game.whip: {
+                1: [1, 2, 3],
+                2: [2, 3, 4],
+                3: [7, 8, 9],
+            },
+            None: 0,
+        }
+
+        self.damage_extremes = {
+            game.dagger: [self.damage_dictionary[game.dagger][0], self.damage_dictionary[game.dagger][-1]],
+            game.shortsword: [self.damage_dictionary[game.shortsword][0], self.damage_dictionary[game.shortsword][-1]],
+            game.whip: [self.damage_dictionary[game.whip][0+1][0], self.damage_dictionary[game.whip][next(reversed(self.damage_dictionary[game.whip]))][-1]],
+            None: [0, 0],
+        }
+
+    @staticmethod
+    def adjust_stats(weapon):
         match weapon:
             case game.dagger:
-                self.weapon_range = 1
+                weapon_range = 1
+                crit_chance = 70
+                crit_multiplier = 1.5
+                speed = player.normal_speed
             case game.shortsword:
-                self.weapon_range = 2
+                weapon_range = 2
+                crit_chance = 60
+                crit_multiplier = 2
+                speed = player.normal_speed - 2
             case game.whip:
-                self.weapon_range = 3
+                weapon_range = 3
+                crit_chance = 50
+                crit_multiplier = 3
+                speed = player.normal_speed - 2
             case _:
-                self.weapon_range = 1
+                weapon_range = 1
+                crit_chance = 0
+                crit_multiplier = 0
+                speed = player.normal_speed
+                player.miss_chance = 0
 
-        return self.weapon_range
+        return weapon_range, crit_chance, crit_multiplier, speed
 
-    def calculate_its_damage(self, weapon, enemy_distance):
+    def calculate_its_damage(self, item, enemy_distance):
         # print(enemy_distance)
-        match weapon:
-            case game.dagger:
-                self.damage = 2
-            case game.shortsword:
-                self.damage = 3
-            case game.whip:
-                match enemy_distance:
-                    case 1:
-                        self.damage = 1
-                    case 2:
-                        self.damage = 5
-                    case 3:
-                        self.damage = 10
-            case _:
-                self.damage = 1
+        if item in self.damage_dictionary:
+            match item:
+                case game.whip:
+                    self.damage = random.choice(self.damage_dictionary[item][enemy_distance])
+                case None:
+                    self.damage = 0
+                case _:
+                    self.damage = random.choice(self.damage_dictionary[item])
 
         return self.damage
 
@@ -1614,7 +1725,7 @@ inv = Inventory()
 player = Player()
 weapons = Weapons()
 dungeon.locate_important_objects_and_entities()
-game.update_player_stats(['hp', 'damage', 'speed'])
+game.update_player_stats(['hp', 'damage', 'speed', 'crit chance', 'crit multiplier', 'miss chance'])
 dungeon.finished_loading = True
 
 

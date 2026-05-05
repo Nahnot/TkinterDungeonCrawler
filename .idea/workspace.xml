@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="Removed the large comment that contained chest class">
+    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="There was a bug that failed to change highlighted buttons when player switches inventory slots/items. Also made lighting system fog of war. Meaning, all visited tiles will be remembered instead of made dark again after they are not lit.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
@@ -413,7 +413,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777858548972</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL-00034" summary="There was a bug that failed to change highlighted buttons when player switches inventory slots/items. Also made lighting system fog of war. Meaning, all visited tiles will be remembered instead of made dark again after they are not lit.">
+      <option name="closed" value="true" />
+      <created>1777869962524</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1777869962524</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -431,7 +439,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Oh dear. I uhhhh fixed enemy vision and highlighting (changed a ton actually). I also finally fixed the zombie AI yay. Next up is refining combat then adding sound patterns." />
     <MESSAGE value="Merge remote-tracking branch 'TkinterDungeonCrawler/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;main.py&#10;&#10;Ok I actually actually actually fixed vision and highlighting. Optimized it too, while I was at it. Only configures tiles in new_light_levels and newly darkened tiles. Hopefully this is it for lighting. Next thing is making the enemy class have children class like zombie, rat, etc." />
     <MESSAGE value="Merge remote-tracking branch 'TkinterDungeonCrawler/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml" />
     <MESSAGE value="Ok I actually actually actually fixed vision and highlighting. Optimized it too, while I was at it. Only configures tiles in new_light_levels and newly darkened tiles. Hopefully this is it for lighting. Next thing is making the enemy class have children class like zombie, rat, etc." />
@@ -456,6 +463,7 @@
     <MESSAGE value="FINALLY FIXED ENEMY BY UPDATING VISION DIRECTION BEFORE ACTION AHHHHHH. Also made zombie sidestep when u orthogonally adjacent to it. If it can't, it will slide back." />
     <MESSAGE value="Made player be able to have bigger highlight range. Thank God I figured out how to add that and fix any issues with it in about 2 hours. Added weapon class to easily handle any weapons I can think of. I added a whip; and it's damage increases as distance from player increases, with a max distance of 3. Renamed sword to dagger, and cool sword to shortsword. Finally, added direction arrows for all entities so that you know what they're looking at." />
     <MESSAGE value="Removed the large comment that contained chest class" />
-    <option name="LAST_COMMIT_MESSAGE" value="Removed the large comment that contained chest class" />
+    <MESSAGE value="There was a bug that failed to change highlighted buttons when player switches inventory slots/items. Also made lighting system fog of war. Meaning, all visited tiles will be remembered instead of made dark again after they are not lit." />
+    <option name="LAST_COMMIT_MESSAGE" value="There was a bug that failed to change highlighted buttons when player switches inventory slots/items. Also made lighting system fog of war. Meaning, all visited tiles will be remembered instead of made dark again after they are not lit." />
   </component>
 </project>
