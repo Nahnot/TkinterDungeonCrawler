@@ -1,4 +1,5 @@
 import platform
+import tkinter
 
 if platform.system() == "Darwin":
     macOS = True
@@ -19,7 +20,7 @@ import tkinter.scrolledtext as scrolledtext
 
 #import idlelib.tooltip as tt
 
-#from PIL import ImageTk
+from PIL import ImageTk
 
 # TO DO: COMBAT
 
@@ -42,12 +43,12 @@ window.geometry(f"{WIDTH}x{HEIGHT}+{HORIZONTAL_OFFSET}+{VERTICAL_OFFSET}")
 # window.state('zoomed')
 # window.resizable(False, False)
 
-super_small_font = font.Font(family="Courier", size=13)
-small_font = font.Font(family="Courier", size=15)
-medium_font = font.Font(family="Courier", size=17)
+super_small_font = font.Font(family="Courier", size=13-2)
+small_font = font.Font(family="Courier", size=15-3)
+medium_font = font.Font(family="Courier", size=17-3)
 large_font = font.Font(family="Courier", size=20)
-very_large_font = font.Font(family="Courier", size=30)
-bold_large_font = font.Font(family="Courier", size=20, weight='bold')
+very_large_font = font.Font(family="Courier", size=30-2)
+bold_large_font = font.Font(family="Courier", size=20-2, weight='bold')
 
 big_left_frame = tk.Frame(window, bg='black')
 big_right_frame = tk.Frame(window, bg='black')
@@ -103,6 +104,8 @@ dummy_button = Button(window, text='ppp')
 dummy_frame = tk.Frame(window)
 dummy_slot = (dummy_frame, dummy_button)
 
+empty_img = tk.PhotoImage(width=1, height=1)
+
 if not macOS:
     BTN_WIDTH = 4
     BTN_HEIGHT = 2
@@ -143,7 +146,7 @@ vertical_directions = ['up', 'down']
 
 class GameController:
     def __init__(self):
-        self.testing = False
+        self.testing = True
         # Item, entity, and object glyphs
         if True:
             self.turn = 'player'
@@ -257,7 +260,7 @@ class GameController:
     def create_button(self, tile_char, parent_frame, btn_type):
 
         # Defaults
-        text = ' '
+        btn_text = ' '
         fg = 'black'
         if self.enable_darkness:
             bg = 'black'
@@ -274,46 +277,43 @@ class GameController:
         # Map dungeon glyphs to rendered text/colors
         match tile_char:
             case '-':
-                text = ' '
+                btn_text = ' '
             case '@':
-                text = self.player
+                btn_text = self.player
             case 'z':
-                text = self.zombie
+                btn_text = self.zombie
             case 'w':
-                text = self.wall
+                btn_text = self.wall
             case 'c':
-                text = self.chest
+                btn_text = self.chest
                 #fg = 'gold'
             case 'd':
-                text = self.door
+                btn_text = self.door
             case 'b':
-                text = self.bars
+                btn_text = self.bars
             case '𝖇':
-                text = self.locked_bars
+                btn_text = self.locked_bars
             case '𝘣':
-                text = self.broken_bars
+                btn_text = self.broken_bars
             case 'k':
-                text = self.key
+                btn_text = self.key
             case 'r':
-                text = self.rock
+                btn_text = self.rock
             case 'R':
-                text = self.big_rock
+                btn_text = self.big_rock
             case 'p':
-                text = self.small_health_potion
+                btn_text = self.small_health_potion
                 #fg = 'red'
             case 's':
-                text = self.shortsword
+                btn_text = self.shortsword
             case '~':
-                text = self.whip
+                btn_text = self.whip
             case _:
-                text = tile_char
-
-        if tile_char in self.exit_arrows:
-            btn_font = large_font
+                btn_text = tile_char
 
         btn = Button(
             parent_frame,
-            text=text,
+            text=btn_text,
             fg=fg,
             font=btn_font,
             activebackground=bg,
@@ -327,12 +327,14 @@ class GameController:
             btn.configure(takefocus=0, focuscolor='', borderless=1, focusthickness=0)
             if btn_type == 'dungeon':
                 btn.configure(width=DUNGEON_BTN_WIDTH_IN_PIXELS, height=DUNGEON_BTN_HEIGHT_IN_PIXELS)
-            elif btn_type == 'inventory':
-                btn.configure(width=INVENTORY_BTN_WIDTH_IN_PIXELS, height=INVENTORY_BTN_HEIGHT_IN_PIXELS)
+            """elif btn_type == 'inventory':
+                btn.configure(width=INVENTORY_BTN_WIDTH_IN_PIXELS, height=INVENTORY_BTN_HEIGHT_IN_PIXELS)"""
         else:
-            btn.grid_propagate(False)
-            btn.grid(padx=BTN_PAD, pady=BTN_PAD)
+            btn.grid(padx=BTN_PAD, pady=BTN_PAD, sticky='nsew')
             btn.configure(width=BTN_WIDTH, height=BTN_HEIGHT)
+
+
+        btn.grid_propagate(False)
 
         """if btn_type == 'dungeon':
             btn.configure(relief='flat')"""
@@ -367,13 +369,14 @@ class GameController:
                     player.miss_chance = (enemy.speed / player.speed) * 10
                     game.update_player_stats(['miss chance'])
             player.apply_highlight_to_button()
-            game.update_log('add turn division', None)
         except RuntimeError:
             print('entity does not exist')
 
+        game.update_log('add turn division', None)
+
     def make_log(self):
         self.game_log = tk.scrolledtext.ScrolledText(log_frame,
-                                                     width=29,
+                                                     width=26,
                                                      height=32,
                                                      state='disabled',
                                                      undo=True,
@@ -383,12 +386,10 @@ class GameController:
         self.game_log.grid(row=0, column=0)
 
     def update_log(self, event_type, event_objects):
-        if event_type == 'add turn division' and not self.updated_game_log_this_turn:
-            return
         if event_type == 'item picked up':
             if event_objects == game.small_health_potion:
                 event_objects = 'Small Health Potion'
-            text = f"{event_objects} has been picked up!\n"
+            log_text = f"{event_objects} has been picked up!\n"
             """first_word, other_text = text.split(' ', 1)
             text_list = [first_word, other_text]
             first_word.title()
@@ -396,18 +397,25 @@ class GameController:
             print(text_list)"""
         elif event_type == 'combat':
             attacker, attacked, damage = event_objects
-            text = f"{attacker} hit {attacked} for {damage} damage!\n"
+            log_text = f"{attacker} hit {attacked} for {damage} damage!\n"
         elif event_type == 'missed attack':
             attacker, attacked = event_objects
-            text = f"{attacker} missed {attacked}!\n"
+            log_text = f"{attacker} missed {attacked}!\n"
         elif event_type == 'killed entity':
             attacker, attacked = event_objects
-            text = f"{attacker} {random.choice(['murdered', 'killed', 'exsanguinated', 'slayed', 'dispatched', 'took care of', 'executed', 'slaughtered', 'felled', 'took out', 'annihilated', 'blotted out', 'removed', 'terminated', 'exterminated', 'neutralized', 'liquidated', 'erased', 'obliterated', 'wasted'])} {attacked}!\n"
+            log_text = f"{attacker} {random.choice(['murdered', 'killed', 'exsanguinated', 'slayed', 'dispatched', 'took care of', 'executed', 'slaughtered', 'felled', 'took out', 'annihilated', 'blotted out', 'removed', 'terminated', 'exterminated', 'neutralized', 'liquidated', 'erased', 'obliterated', 'wasted'])} {attacked}!\n"
         elif event_type == 'add turn division':
-            text = '\n-----------------------------\n\n'
+            if self.updated_game_log_this_turn:
+                print('division time!!')
+                log_text = '\n'
+                print(self.game_log['width'])
+                for char in range(int(self.game_log['width'])):
+                    log_text += '-'
+                log_text += '\n\n'
+            else: log_text = ''
         self.game_log['state'] = 'normal'
         # noinspection PyUnboundLocalVariable
-        self.game_log.insert('1.0', text)
+        self.game_log.insert('1.0', log_text)
         self.game_log['state'] = 'disabled'
         self.updated_game_log_this_turn = True
 
@@ -449,7 +457,7 @@ class GameController:
 
 class Dungeon:
     def __init__(self):
-        self.level = 1
+        self.level = 2
 
         self.lowest_light_level_in_current_level = 0
 
@@ -459,6 +467,7 @@ class Dungeon:
         self.speed_of_current_entities = {}
         # The speed is now in descending order, meaning that higher speed entities have a higher index, meaning they go first
         self.ordered_speed_of_current_entities = {}
+        self.current_dead_enemies = []
 
         self.entity_dicts = {'current_enemies': self.current_enemies,
                              'current_entities': self.current_entities,
@@ -511,21 +520,21 @@ class Dungeon:
                                    "w--------------w\n"
                                    "wwwwwwwwwwwwwwww")
             case 1:
-                self.level_text = ("wwwwwwwwwwwwwwwwwwwwwwwwwwww\n"
-                                   "w--Rr-R-------R-r----Rkwwwww\n"
-                                   "w---------------------rb---w\n"
-                                   "wbbbwb-bwbb-wb𝖇bw𝖇bbw--b---w\n"
-                                   "w---w---w---wr--wp--w--b---w\n"
-                                   "w---w---w---w-krw---w-Rwwwww\n"
-                                   "w---w---w--pw@--w---w--b---w\n"
-                                   "wwwwwwwwwwwwwwwwwwwww-rb---w\n"
-                                   "w---w---w---w---w---w--b---w\n"
-                                   "w---w-R-w---wR--w---w--wwwww\n"
-                                   "w--zw---wz-rw--rwRr-w--b---w\n"
-                                   "wb--w---wb--w---w--bw--b---w\n"
-                                   "⏴------r---------------b---w\n"
-                                   "⏴----------R---R-------wwwww\n"
-                                   "wwwwwwwwwwwwwwwwwwwwwwwwwwww\n")
+                self.level_text = ("wwwwwwwwwwwwwwwwwwwwwwwwwww\n"
+                                   "--Rr-R-------R-r----R-wwwww\n"
+                                   "---------------------rb---w\n"
+                                   "wwwwb-bwbb-wb𝖇bw-bbw--b---w\n"
+                                   "---w---w---wr--w---w--b---w\n"
+                                   "---w---w---w-krw-p-w-Rwwwww\n"
+                                   "---w---w--pw@--w---w--b---w\n"
+                                   "wwwwwwwwwwwwwwwwwwww-rb---w\n"
+                                   "---w---w--pw---w---w--b---w\n"
+                                   "---w-R-w---wR--w---w--wwwww\n"
+                                   "---w---wz-rw--rwRr-w--b---w\n"
+                                   "wwww---wb--w---w--bw--b---w\n"
+                                   "⏴-------r-------------b---w\n"
+                                   "⏴-----------R---R-----wwwww\n"
+                                   "wwwwwwwwwwwwwwwwwwwwwwwwwww\n")
             case 2:
                 if not game.testing:
                     player.vision_radius = 3
@@ -673,10 +682,14 @@ class Inventory:
         col = 0
         for i in range(1, 11):
             new_frame = game.create_frame(inventory_frame)
-            btn = game.create_button(' ', new_frame, 'inventory')
-            self.inventory[i - 1] = [new_frame, btn]
-            self.inventory[i - 1][get_frame].grid(row=row, column=col, sticky='nsew')
-            self.inventory[i - 1][get_btn].grid(row=row, column=col, sticky='nsew')
+            new_btn = game.create_button(' ', new_frame, 'inventory')
+            self.inventory[i - 1] = [new_frame, new_btn]
+            inventory_frame.grid(row=row, column=col, sticky='nsew')
+            inventory_frame.grid_rowconfigure(row, weight=1)
+            inventory_frame.grid_columnconfigure(col, weight=1)
+            inventory_frame.grid_propagate(False)
+            new_btn.grid(row=row, column=col, sticky='nsew')
+            new_btn.grid_propagate(False)
             col += 1
             if i % 5 == 0 and i != 0:
                 row += 1
@@ -695,7 +708,7 @@ class Inventory:
                 game.update_log('item picked up', item)
                 if item == game.small_health_potion:
                     self.change_inventory_slot_fg(slot, item)
-                if item in [game.shortsword, game.whip]:
+                if item in [game.shortsword]:
                     slot[get_btn]['font'] = small_font
                 if item in game.weapons:
                     self.influence_player_highlight()
@@ -924,11 +937,12 @@ class Player:
             interacted_btn = interacted_tile[get_btn]
             interacted_spot = interacted_btn['text']
             interacted_tile_number += 1
-            if tuple(interacted_tile) in self.rendered_light_levels or self.attack_mode:
+            if tuple(interacted_tile) in self.rendered_light_levels:
                 print(f'interacted_spot: {interacted_spot}')
-                if prev_interacted_btn is not None and self.highlight_range > 1 and any(dungeon.tile_is_blocked(btn) for btn in prev_interacted_btns_list) and any(spot not in game.singular_interactable_items for spot in prev_interacted_spots_list) and self.attack_mode:
-                    print(f'blocked, {dungeon.tile_is_blocked(prev_interacted_btn)}')
-                    pass
+                print(f'is blocked?: {any(dungeon.tile_is_blocked(btn) for btn in prev_interacted_btns_list)}')
+                if prev_interacted_btn is not None and self.highlight_range > 1 and any(dungeon.tile_is_blocked(btn) for btn in prev_interacted_btns_list):
+                    print('no interaction')
+                    break
                 elif interacted_spot == game.chest:
                     pass
                     #print('chest interaction')
@@ -1113,8 +1127,7 @@ class Player:
             for (frame, btn), _ in self.prev_light_levels.items():
                 if (frame, btn) not in new_light_levels:
                     tile_color = game.lighting_colors[0]
-                    frame.configure(bg=tile_color)
-                    btn.configure(bg=tile_color)
+                    frame['bg'] = btn['bg'] = btn['fg'] = tile_color
 
                     self.rendered_light_levels[(frame, btn)] = 0
         else:
@@ -1536,6 +1549,7 @@ class Zombie(Enemy):
 
 class Combat:
     def __init__(self, attacker, attacked):
+
         rng = random.randint(1, 101)
         rng2 = random.randint(1, 101)
         rng3 = random.randint(1, 101)
