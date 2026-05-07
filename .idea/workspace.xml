@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="There was a bug that failed to change highlighted buttons when player switches inventory slots/items. Also made lighting system fog of war. Meaning, all visited tiles will be remembered instead of made dark again after they are not lit." />
+    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="Fixed some bugs that only appeared in windows">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -36,6 +39,11 @@
         <option value="Nahnot &lt;chavez.darren.f@gmail.com&gt;" />
       </list>
     </option>
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -44,12 +52,12 @@
     &quot;assignee&quot;: &quot;Nahnot&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/Nahnot/TkinterDungeonCrawler&quot;,
-    &quot;accountId&quot;: &quot;93054c4d-049c-4b2f-a2b8-12a151058551&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Nahnot/TkinterDungeonCrawler",
+    "accountId": "93b01b75-6f51-46a9-8ab5-7d4c5917298a"
   }
-}</component>
+}]]></component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
@@ -84,14 +92,15 @@
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
     "last_opened_file_path": "/Users/rizfc/PycharmProjects/TkinterDungeonCrawler",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager"
+    "settings.editor.selected.configurable": "preferences.general"
   }
 }]]></component>
   <component name="RecentsManager">
@@ -418,7 +427,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777869962524</updated>
     </task>
-    <option name="localTasksCounter" value="35" />
+    <task id="LOCAL-00035" summary="Fixed some bugs that only appeared in windows">
+      <option name="closed" value="true" />
+      <created>1778046277619</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1778046277619</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -436,7 +453,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Merge remote-tracking branch 'TkinterDungeonCrawler/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml&#10;#&#9;main.py&#10;&#10;Ok I actually actually actually fixed vision and highlighting. Optimized it too, while I was at it. Only configures tiles in new_light_levels and newly darkened tiles. Hopefully this is it for lighting. Next thing is making the enemy class have children class like zombie, rat, etc." />
     <MESSAGE value="Merge remote-tracking branch 'TkinterDungeonCrawler/main'&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml" />
     <MESSAGE value="Ok I actually actually actually fixed vision and highlighting. Optimized it too, while I was at it. Only configures tiles in new_light_levels and newly darkened tiles. Hopefully this is it for lighting. Next thing is making the enemy class have children class like zombie, rat, etc." />
     <MESSAGE value="Ok well I was lying when I said highlighting and vision was fixed. So basically what I did was enable player to look orthogonally whenever player held weapon. That's how I figured out that my enemy highlighting is very botched (only specifically when I change vision direction) meaning that enemy highlight doesn't get restored when I look away then look back. HOPEFULLY THIS IS IT FOR HIGHLIGHTING AND VISION. I have a weird feeling that it's not though. Hoping against hope this isn't the case" />
@@ -461,6 +477,7 @@
     <MESSAGE value="Made player be able to have bigger highlight range. Thank God I figured out how to add that and fix any issues with it in about 2 hours. Added weapon class to easily handle any weapons I can think of. I added a whip; and it's damage increases as distance from player increases, with a max distance of 3. Renamed sword to dagger, and cool sword to shortsword. Finally, added direction arrows for all entities so that you know what they're looking at." />
     <MESSAGE value="Removed the large comment that contained chest class" />
     <MESSAGE value="There was a bug that failed to change highlighted buttons when player switches inventory slots/items. Also made lighting system fog of war. Meaning, all visited tiles will be remembered instead of made dark again after they are not lit." />
-    <option name="LAST_COMMIT_MESSAGE" value="There was a bug that failed to change highlighted buttons when player switches inventory slots/items. Also made lighting system fog of war. Meaning, all visited tiles will be remembered instead of made dark again after they are not lit." />
+    <MESSAGE value="Fixed some bugs that only appeared in windows" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed some bugs that only appeared in windows" />
   </component>
 </project>

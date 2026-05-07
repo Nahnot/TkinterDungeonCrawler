@@ -1,4 +1,5 @@
 import platform
+import sys
 import tkinter
 
 if platform.system() == "Darwin":
@@ -205,8 +206,9 @@ class GameController:
         if True:
             self.solid_objects = [self.wall, self.chest, self.door, self.bars, self.locked_bars, self.rock, self.big_rock]
             self.solid_objects.extend(self.singular_interactable_items)
-            self.solid_objects.extend(self.entities)
             self.solid_objects.extend(self.exit_arrows)
+            self.solid_non_entities = self.solid_objects.copy()
+            self.solid_objects.extend(self.entities)
             self.opaque_objects = [self.wall, self.door]
             #print(self.solid_objects)
 
@@ -343,34 +345,31 @@ class GameController:
 
     def advance_turn(self, player_action):
         game.updated_game_log_this_turn = False
-        try:
-            for entity, speed in dungeon.ordered_speed_of_current_entities.items():
-                if entity == player:
-                    match player_action:
-                        case 'movement':
-                            player.steps_to_take_after_pressing_wasd()
-                        case 'interaction':
-                            player.interact()
-                            if self.entered_new_level:
-                                self.entered_new_level = False
-                                break
-                else:
-                    try:
-                        entity.action()
-                        entity.prepare_action()
-                    except RuntimeError:
-                        print('entity does not exist')
-            #player.vision_changed = False
-            player.render_vision()
-            player.erase_highlight_from_prev_btn()
-            for enemy in dungeon.current_enemies.values():
-                enemy.steps_to_highlight_button()
-                if player.attack_mode and enemy.coords in player.highlighted_coords_list:
-                    player.miss_chance = (enemy.speed / player.speed) * 10
-                    game.update_player_stats(['miss chance'])
-            player.apply_highlight_to_button()
-        except RuntimeError:
-            print('entity does not exist')
+        for entity, speed in dungeon.ordered_speed_of_current_entities.items():
+            if entity == player:
+                match player_action:
+                    case 'movement':
+                        player.steps_to_take_after_pressing_wasd()
+                    case 'interaction':
+                        player.interact()
+                        if self.entered_new_level:
+                            self.entered_new_level = False
+                            break
+            else:
+                if entity.is_alive:
+                    entity.action()
+                    entity.prepare_action()
+        # player.vision_changed = False
+        for repetition in range(len(dungeon.dead_enemies_this_turn)):
+            self.erase_entity()
+        player.render_vision()
+        player.erase_highlight_from_prev_btn()
+        for enemy in dungeon.current_enemies.values():
+            enemy.steps_to_highlight_button()
+            if player.attack_mode and enemy.coords in player.highlighted_coords_list:
+                player.miss_chance = (enemy.speed / player.speed) * 10
+                game.update_player_stats(['miss chance'])
+        player.apply_highlight_to_button()
 
         game.update_log('add turn division', None)
 
@@ -423,9 +422,17 @@ class GameController:
         pass
 
     @staticmethod
-    def erase_entity(enemy_index):
-        del dungeon.current_enemies[enemy_index]
-        del dungeon.current_entities[enemy_index]
+    def erase_entity():
+        for key, enemy in dungeon.dead_enemies_this_turn.items():
+            highlighted_tile = dungeon.tiles_indexed_by_coords[tuple(enemy.highlighted_coords)]
+            highlighted_tile[get_frame].configure(bg=game.lighting_colors[player.rendered_light_levels[tuple(highlighted_tile)]])
+            enemy_index = next((key for key, val in dungeon.current_enemies.items() if val == enemy), None)
+            del dungeon.speed_of_current_entities[enemy]
+            del dungeon.ordered_speed_of_current_entities[enemy]
+            del dungeon.current_enemies[enemy_index]
+            del dungeon.current_entities[enemy_index]
+            del dungeon.dead_enemies_this_turn[key]
+            break
 
     @staticmethod
     def update_player_stats(list_of_updates):
@@ -467,7 +474,7 @@ class Dungeon:
         self.speed_of_current_entities = {}
         # The speed is now in descending order, meaning that higher speed entities have a higher index, meaning they go first
         self.ordered_speed_of_current_entities = {}
-        self.current_dead_enemies = []
+        self.dead_enemies_this_turn = {}
 
         self.entity_dicts = {'current_enemies': self.current_enemies,
                              'current_entities': self.current_entities,
@@ -550,7 +557,7 @@ class Dungeon:
                                    "wwwwwww----ww-----wwwwwwwww\n"
                                    "wwwwwwwwwwwwwww-zzwwwwwwwww\n"
                                    "wwwwwwwwwwwwwwwzz-wwwwwwwww\n"
-                                   "wwwwwwwwwwwwwww-k-wwwwwwwww\n"
+                                   "wwwwwwwwwwwwwww-kzwwwwwwwww\n"
                                    "wwwwwwwwwwwwwwwwwwwwwwwwwww\n")
             case 9999:
                 self.level_text = ("wwwwwwwwwwww\n"
@@ -560,6 +567,7 @@ class Dungeon:
                                    "wwwwwwwwwwww")
             case _:
                 window.destroy()
+                sys.exit(0)
 
     def build_level(self):
         # Clear old widgets
@@ -621,7 +629,7 @@ class Dungeon:
         new_tile = self.tiles_indexed_by_coords[tuple(entity_coords)][get_btn]
 
         if new_tile is not None:
-            if self.tile_is_blocked(new_tile):
+            if self.tile_is_blocked(new_tile, game.solid_objects):
                 if entity == game.player:
                     player.changed_location = False
                 return prev_entity_coords
@@ -629,8 +637,8 @@ class Dungeon:
         return entity_coords
 
     @staticmethod
-    def tile_is_blocked(the_btn):
-        return any(solid_obj in the_btn['text'] for solid_obj in game.solid_objects)
+    def tile_is_blocked(the_btn, objects_to_check):
+        return any(obj in the_btn['text'] for obj in objects_to_check)
 
     def go_to_new_location(self, entity, entity_coords, prev_entity_coords):
         new_tile = self.tiles_indexed_by_coords[tuple(entity_coords)][get_btn]
@@ -684,10 +692,10 @@ class Inventory:
             new_frame = game.create_frame(inventory_frame)
             new_btn = game.create_button(' ', new_frame, 'inventory')
             self.inventory[i - 1] = [new_frame, new_btn]
-            inventory_frame.grid(row=row, column=col, sticky='nsew')
-            inventory_frame.grid_rowconfigure(row, weight=1)
-            inventory_frame.grid_columnconfigure(col, weight=1)
-            inventory_frame.grid_propagate(False)
+            new_frame.grid(row=row, column=col, sticky='nsew')
+            new_frame.grid_rowconfigure(row, weight=1)
+            new_frame.grid_columnconfigure(col, weight=1)
+            new_frame.grid_propagate(False)
             new_btn.grid(row=row, column=col, sticky='nsew')
             new_btn.grid_propagate(False)
             col += 1
@@ -754,8 +762,8 @@ class Inventory:
         self.prev_inv_number_pressed = self.inv_number_pressed
         if num == '0':
             num = '10'
-        self.select_item(self.inventory[int(num) - 1])
         self.inv_number_pressed = num
+        self.select_item(self.inventory[int(num) - 1])
 
     def influence_player_highlight(self):
         print(self.selected_item_slot)
@@ -811,7 +819,7 @@ class Player:
         if not game.testing:
             self.vision_radius = 2
         else:
-            self.vision_radius = 5
+            self.vision_radius = 3
 
         self.weapon_equipped = None
 
@@ -937,40 +945,41 @@ class Player:
             interacted_btn = interacted_tile[get_btn]
             interacted_spot = interacted_btn['text']
             interacted_tile_number += 1
+            print(f'interacted_spot: {interacted_spot}')
             if tuple(interacted_tile) in self.rendered_light_levels:
-                print(f'interacted_spot: {interacted_spot}')
-                print(f'is blocked?: {any(dungeon.tile_is_blocked(btn) for btn in prev_interacted_btns_list)}')
-                if prev_interacted_btn is not None and self.highlight_range > 1 and any(dungeon.tile_is_blocked(btn) for btn in prev_interacted_btns_list):
-                    print('no interaction')
-                    break
-                elif interacted_spot == game.chest:
-                    pass
-                    #print('chest interaction')
-                    #chest.open(self.btn_highlighted_coords)
-                elif (interacted_spot == game.locked_bars or interacted_spot == game.door) and \
-                        inv.selected_item_slot[get_btn]['text'] == game.key:
-                    #print('locked bars interaction')
-                    interacted_btn.config(text=' ')
-                    inv.destroy_selected_item()
-                elif interacted_spot in game.exit_arrows:
-                    #print('exited room')
-                    dungeon.next_level()
-                elif interacted_spot in game.singular_interactable_items:
-                    for item in game.singular_interactable_items:
-                        if item == game.small_health_potion:
-                            interacted_btn['fg'] = 'black'
-                        if item == interacted_spot:
-                            inv.pick_up_item(item)
-                            interacted_btn.config(text=' ')
-                            break
+                #print(f'is blocked?: {any(dungeon.tile_is_blocked(btn) for btn in prev_interacted_btns_list)}')
+                if not self.attack_mode:
+                    if interacted_spot == game.chest:
+                        pass
+                        #print('chest interaction')
+                        #chest.open(self.btn_highlighted_coords)
+                    elif (interacted_spot == game.locked_bars or interacted_spot == game.door) and \
+                            inv.selected_item_slot[get_btn]['text'] == game.key:
+                        #print('locked bars interaction')
+                        interacted_btn.config(text=' ')
+                        inv.destroy_selected_item()
+                    elif interacted_spot in game.exit_arrows:
+                        #print('exited room')
+                        dungeon.next_level()
+                    elif interacted_spot in game.singular_interactable_items:
+                        for item in game.singular_interactable_items:
+                            if item == game.small_health_potion:
+                                interacted_btn['fg'] = 'black'
+                            if item == interacted_spot:
+                                inv.pick_up_item(item)
+                                interacted_btn.config(text=' ')
+                                break
                 elif any(enemy in interacted_spot for enemy in game.enemies) and self.attack_mode:
-                    for enemy in dungeon.current_enemies.values():
-                        if enemy.tile_itself == interacted_tile:
-                            distance_to_enemy = interacted_tile_number
-                            self.damage = weapons.calculate_its_damage(inv.selected_item_slot[get_btn]['text'], distance_to_enemy)
-                            print('player attack')
-                            Combat(attacker=self, attacked=enemy)
-                            break
+                    if prev_interacted_btn is not None and self.highlight_range > 1 and any(dungeon.tile_is_blocked(btn, game.solid_non_entities) and btn['text'] not in game.enemies for btn in prev_interacted_btns_list):
+                        print('no interaction')
+                    else:
+                        for enemy in dungeon.current_enemies.values():
+                            if enemy.tile_itself == interacted_tile:
+                                distance_to_enemy = interacted_tile_number
+                                self.damage = weapons.calculate_its_damage(inv.selected_item_slot[get_btn]['text'], distance_to_enemy)
+                                print('player attack')
+                                Combat(attacker=self, attacked=enemy)
+                                break
             if self.highlight_range > 1:
                 prev_interacted_btn = interacted_btn
                 prev_interacted_spot = interacted_spot
@@ -1048,8 +1057,6 @@ class Player:
 
     def steps_to_take_after_pressing_wasd(self):
         dungeon.go_to_new_location(game.player, self.coords, self.prev_coords)
-        self.erase_highlight_from_prev_btn()
-        self.apply_highlight_to_button()
         game.add_arrow_equivalent_to_looking_dir(game.player, self.tile_itself, self.highlight_direction)
 
     def steps_to_take_after_pressing_looking_keys(self):
@@ -1059,6 +1066,11 @@ class Player:
             self.attack_mode = False
 
         self.determine_vision_direction()
+
+        if not self.attack_mode:
+            self.highlight_range = 1
+        else:
+            self.highlight_range = weapons.weapon_range
 
         if inv.weapon_just_selected:
             self.determine_highlighted_buttons()
@@ -1173,6 +1185,8 @@ class Enemy:
         self.sees_player = False
         self.prev_saw_player = False
 
+        self.is_alive = True
+
         self.rendered_light_levels = {}
 
     def can_see_player(self):
@@ -1216,7 +1230,7 @@ class Enemy:
         temp_row, temp_col = self.potential_coords
         tile_btn = dungeon.tiles_indexed_by_coords[(temp_row, temp_col)][get_btn]
         #print(f'temp: {initial_temp_dir}, {tile_btn['text']}')
-        if not dungeon.tile_is_blocked(tile_btn):
+        if not dungeon.tile_is_blocked(tile_btn, game.solid_objects):
             self.highlight_direction = initial_temp_dir
             return
         else:
@@ -1234,7 +1248,7 @@ class Enemy:
                 if (temp_row, temp_col) not in dungeon.tiles_indexed_by_coords:
                     continue
                 tile_btn = dungeon.tiles_indexed_by_coords[(temp_row, temp_col)][get_btn]
-                if not dungeon.tile_is_blocked(tile_btn):
+                if not dungeon.tile_is_blocked(tile_btn, game.solid_objects):
                     self.highlight_direction = temp_dir
                     #print('yay')
                     return
@@ -1374,15 +1388,8 @@ class Enemy:
 
     def kill_self(self):
         self.tile_itself[get_btn].config(text=' ')
-        for i, enemy in dungeon.current_enemies.items():
-            if enemy.coords == self.coords:
-                highlighted_tile = dungeon.tiles_indexed_by_coords[tuple(self.highlighted_coords)]
-                highlighted_tile[get_frame].configure(
-                    bg=game.lighting_colors[player.rendered_light_levels[tuple(highlighted_tile)]])
-                del dungeon.speed_of_current_entities[enemy]
-                del dungeon.ordered_speed_of_current_entities[enemy]
-                game.erase_entity(i)
-                break
+        self.is_alive = False
+        dungeon.dead_enemies_this_turn[len(dungeon.dead_enemies_this_turn)] = self
 
 
 class Zombie(Enemy):
@@ -1501,7 +1508,7 @@ class Zombie(Enemy):
 
             tile_btn = dungeon.tiles_indexed_by_coords[(row, col)][get_btn]
 
-            if not dungeon.tile_is_blocked(tile_btn):
+            if not dungeon.tile_is_blocked(tile_btn, game.solid_objects):
                 self.highlight_direction = temp_dir
                 return
 
@@ -1517,7 +1524,7 @@ class Zombie(Enemy):
 
             tile_btn = dungeon.tiles_indexed_by_coords[(row, col)][get_btn]
 
-            if not dungeon.tile_is_blocked(tile_btn):
+            if not dungeon.tile_is_blocked(tile_btn, game.solid_objects):
                 self.highlight_direction = temp_dir
                 return
 
@@ -1583,13 +1590,13 @@ class Combat:
 class Weapons:
     def __init__(self):
         self.damage_dictionary = {
-            game.dagger: [3, 4, 5],
+            game.dagger: [2, 3, 4],
             game.shortsword: [2, 3, 4],
             # Index of game.whip dict is enemy distance
             game.whip: {
-                1: [1, 2, 3],
-                2: [2, 3, 4],
-                3: [7, 8, 9],
+                1: [1, 2],
+                2: [3, 4],
+                3: [6, 7, 8],
             },
             None: 0,
         }
@@ -1601,32 +1608,31 @@ class Weapons:
             None: [0, 0],
         }
 
-    @staticmethod
-    def adjust_stats(weapon):
+    def adjust_stats(self, weapon):
         match weapon:
             case game.dagger:
-                weapon_range = 1
-                crit_chance = 70
-                crit_multiplier = 1.5
-                speed = player.normal_speed
+                self.weapon_range = 1
+                self.crit_chance = 80
+                self.crit_multiplier = 1.5
+                self.speed = player.normal_speed
             case game.shortsword:
-                weapon_range = 2
-                crit_chance = 60
-                crit_multiplier = 2
-                speed = player.normal_speed - 2
+                self.weapon_range = 2
+                self.crit_chance = 60
+                self.crit_multiplier = 2
+                self.speed = player.normal_speed - 2
             case game.whip:
-                weapon_range = 3
-                crit_chance = 50
-                crit_multiplier = 3
-                speed = player.normal_speed - 2
+                self.weapon_range = 3
+                self.crit_chance = 50
+                self.crit_multiplier = 2.5
+                self.speed = player.normal_speed - 2
             case _:
-                weapon_range = 1
-                crit_chance = 0
-                crit_multiplier = 0
-                speed = player.normal_speed
+                self.weapon_range = 1
+                self.crit_chance = 0
+                self.crit_multiplier = 0
+                self.speed = player.normal_speed
                 player.miss_chance = 0
 
-        return weapon_range, crit_chance, crit_multiplier, speed
+        return self.weapon_range, self.crit_chance, self.crit_multiplier, self.speed
 
     def calculate_its_damage(self, item, enemy_distance):
         # print(enemy_distance)
