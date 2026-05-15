@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="Instead of having a try block for the advance turn, which goes to the except part when entity does not exist, happening directly after kill self. There were bugs related to that, so I simply killed off enemies after a turn has ended (but I remove the text right away to make room for enemies to move into the previously filled tile). Made interactions with anything other than enemies only possible when not in attack mode. I added a lot kinda... so I wont explain 'em all.">
+    <list default="true" id="f5261b46-97dc-44fb-a256-efc60119ab15" name="Changes" comment="Instead of having a try block for the advance turn, which goes to the except part when entity does not exist, happening directly after kill self. There were bugs related to that, so I simply killed off enemies after a turn has ended (but I remove the text right away to make room for enemies to move into the previously filled tile). Made interactions with anything other than enemies only possible when not in attack mode. I added a game over screen that resets the whole room if the player dies. Added colored button reflecting an entity's hp. Uhh that should be all.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pyinstall.py" beforeDir="false" afterPath="$PROJECT_DIR$/pyinstall.py" afterDir="false" />
@@ -80,30 +80,30 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;Python.inventory_testing.executor&quot;: &quot;Run&quot;,
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.pyinstall.executor&quot;: &quot;Run&quot;,
-    &quot;Python.testers.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/rizfc/PycharmProjects/TkinterDungeonCrawler&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.general&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.inventory_testing.executor": "Run",
+    "Python.main.executor": "Run",
+    "Python.pyinstall.executor": "Run",
+    "Python.testers.executor": "Run",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "/Users/rizfc/PycharmProjects/TkinterDungeonCrawler",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.general"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
@@ -144,7 +144,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-024ed6589d45-c2ffad84badb-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-261.23567.174" />
+        <option value="bundled-python-sdk-c59985aa861c-c2ffad84badb-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-261.24374.152" />
       </set>
     </attachedChunks>
   </component>
@@ -444,7 +444,15 @@
       <option name="project" value="LOCAL" />
       <updated>1778123966992</updated>
     </task>
-    <option name="localTasksCounter" value="37" />
+    <task id="LOCAL-00037" summary="Instead of having a try block for the advance turn, which goes to the except part when entity does not exist, happening directly after kill self. There were bugs related to that, so I simply killed off enemies after a turn has ended (but I remove the text right away to make room for enemies to move into the previously filled tile). Made interactions with anything other than enemies only possible when not in attack mode. I added a game over screen that resets the whole room if the player dies. Added colored button reflecting an entity's hp. Uhh that should be all.">
+      <option name="closed" value="true" />
+      <created>1778885484811</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1778885484811</updated>
+    </task>
+    <option name="localTasksCounter" value="38" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -462,7 +470,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Ok I actually actually actually fixed vision and highlighting. Optimized it too, while I was at it. Only configures tiles in new_light_levels and newly darkened tiles. Hopefully this is it for lighting. Next thing is making the enemy class have children class like zombie, rat, etc." />
     <MESSAGE value="Ok well I was lying when I said highlighting and vision was fixed. So basically what I did was enable player to look orthogonally whenever player held weapon. That's how I figured out that my enemy highlighting is very botched (only specifically when I change vision direction) meaning that enemy highlight doesn't get restored when I look away then look back. HOPEFULLY THIS IS IT FOR HIGHLIGHTING AND VISION. I have a weird feeling that it's not though. Hoping against hope this isn't the case" />
     <MESSAGE value="Ok well I was lying when I said highlighting and vision was fixed. So basically what I did was enable player to look orthogonally whenever player held weapon. That's how I figured out that my enemy highlighting is very botched (only specifically when I change vision direction) meaning that enemy highlight doesn't get restored when I look away then look back. I also made enemy subclasses! (check the zombie class). Funny thing is, I refactored tile_info to tile_itself (cuz I like it when it goes player.tile_itself). Then it made highlighting go absolutely haywire. After struggling for a few hrs, I realized that in the Zombie class, tile_info was not changed to tile_itself, which is weird honestly. Back to highlighting and vision, I optimized rendering to my fullest ability, having to add many edge cases after. This did not really help the lag that much, and the biggest optimization I can make will probably be in the determine light levels. I will have to pre-compute every ray (meaning that I'll add another two more for loops inside the_pattern_forge yay!!!!!!!). I'll report on that when it's done." />
     <MESSAGE value="Ok well I was lying when I said highlighting and vision was fixed. So basically what I did was enable player to look orthogonally whenever player held weapon. That's how I figured out that my enemy highlighting is very botched (only specifically when I change vision direction) meaning that enemy highlight doesn't get restored when I look away then look back. I also made enemy subclasses! (check the zombie class). Funny thing is, I refactored tile_info to tile_itself (cuz I like it when it goes player.tile_itself). Then it made highlighting go absolutely haywire. After struggling for a few hrs, I realized that in the Zombie class, tile_info was not changed to tile_itself, which is weird honestly. Back to highlighting and vision, I optimized rendering to my fullest ability, having to add many edge cases after. This did not really help the lag that much, and the biggest optimization I can make will probably be in the determine light levels. I will have to pre-compute every ray (meaning that I'll add another for loop inside the_pattern_forge yay!!!!!!!). I'll report on that when it's done." />
@@ -487,6 +494,7 @@
     <MESSAGE value="There was a bug that failed to change highlighted buttons when player switches inventory slots/items. Also made lighting system fog of war. Meaning, all visited tiles will be remembered instead of made dark again after they are not lit." />
     <MESSAGE value="Fixed some bugs that only appeared in windows" />
     <MESSAGE value="Instead of having a try block for the advance turn, which goes to the except part when entity does not exist, happening directly after kill self. There were bugs related to that, so I simply killed off enemies after a turn has ended (but I remove the text right away to make room for enemies to move into the previously filled tile). Made interactions with anything other than enemies only possible when not in attack mode. I added a lot kinda... so I wont explain 'em all." />
-    <option name="LAST_COMMIT_MESSAGE" value="Instead of having a try block for the advance turn, which goes to the except part when entity does not exist, happening directly after kill self. There were bugs related to that, so I simply killed off enemies after a turn has ended (but I remove the text right away to make room for enemies to move into the previously filled tile). Made interactions with anything other than enemies only possible when not in attack mode. I added a lot kinda... so I wont explain 'em all." />
+    <MESSAGE value="Instead of having a try block for the advance turn, which goes to the except part when entity does not exist, happening directly after kill self. There were bugs related to that, so I simply killed off enemies after a turn has ended (but I remove the text right away to make room for enemies to move into the previously filled tile). Made interactions with anything other than enemies only possible when not in attack mode. I added a game over screen that resets the whole room if the player dies. Added colored button reflecting an entity's hp. Uhh that should be all." />
+    <option name="LAST_COMMIT_MESSAGE" value="Instead of having a try block for the advance turn, which goes to the except part when entity does not exist, happening directly after kill self. There were bugs related to that, so I simply killed off enemies after a turn has ended (but I remove the text right away to make room for enemies to move into the previously filled tile). Made interactions with anything other than enemies only possible when not in attack mode. I added a game over screen that resets the whole room if the player dies. Added colored button reflecting an entity's hp. Uhh that should be all." />
   </component>
 </project>

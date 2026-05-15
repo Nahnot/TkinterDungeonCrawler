@@ -45,6 +45,7 @@ window.geometry(f"{WIDTH}x{HEIGHT}+{HORIZONTAL_OFFSET}+{VERTICAL_OFFSET}")
 # window.state('zoomed')
 # window.resizable(False, False)
 
+dungeon_font = font.Font(family="Courier", size=11)
 super_small_font = font.Font(family="Courier", size=13-2)
 small_font = font.Font(family="Courier", size=15-3)
 medium_font = font.Font(family="Courier", size=17-3)
@@ -106,11 +107,8 @@ dummy_button = Button(window, text='ppp')
 dummy_frame = tk.Frame(window)
 dummy_slot = (dummy_frame, dummy_button)
 
-empty_img = tk.PhotoImage(width=1, height=1)
+empty_img = tk.PhotoImage()
 
-if not macOS:
-    BTN_WIDTH = 4
-    BTN_HEIGHT = 2
 DUNGEON_BTN_WIDTH_IN_PIXELS = 48
 DUNGEON_BTN_HEIGHT_IN_PIXELS = 48
 INVENTORY_BTN_WIDTH_IN_PIXELS = 74
@@ -258,7 +256,6 @@ class GameController:
             new_frame.configure(width=INVENTORY_FRAME_WIDTH, height=INVENTORY_FRAME_HEIGHT)
         elif parent_frame == dungeon_frame:
             new_frame.configure(width=DUNGEON_FRAME_WIDTH, height=DUNGEON_FRAME_HEIGHT)
-        new_frame.grid_propagate(False)
         return new_frame
 
     def create_button(self, tile_char, parent_frame, btn_type):
@@ -270,7 +267,7 @@ class GameController:
             bg = 'black'
         else:
             bg = self.default_color
-        btn_font = super_small_font
+        btn_font = dungeon_font
         if btn_type == 'inventory':
             btn_font = large_font
             bg = self.default_color
@@ -323,20 +320,19 @@ class GameController:
             activebackground=bg,
             activeforeground=fg,
             bg=bg,
-            command=command
+            command=command,
+            image=empty_img,
+            compound='center',
         )
 
         if macOS:
             # noinspection PyArgumentList
             btn.configure(takefocus=0, focuscolor='', borderless=1, focusthickness=0)
-            if btn_type == 'dungeon':
-                btn.configure(width=DUNGEON_BTN_WIDTH_IN_PIXELS, height=DUNGEON_BTN_HEIGHT_IN_PIXELS)
-            """elif btn_type == 'inventory':
-                btn.configure(width=INVENTORY_BTN_WIDTH_IN_PIXELS, height=INVENTORY_BTN_HEIGHT_IN_PIXELS)"""
-        else:
-            btn.grid(padx=BTN_PAD, pady=BTN_PAD, sticky='nsew')
-            btn.configure(width=BTN_WIDTH, height=BTN_HEIGHT)
-
+        if btn_type == 'dungeon':
+            btn.configure(width=DUNGEON_BTN_WIDTH_IN_PIXELS, height=DUNGEON_BTN_HEIGHT_IN_PIXELS)
+        elif btn_type == 'inventory':
+            btn.configure(width=INVENTORY_BTN_WIDTH_IN_PIXELS, height=INVENTORY_BTN_HEIGHT_IN_PIXELS)
+        btn.grid(padx=BTN_PAD, pady=BTN_PAD, sticky='nsew')
 
         btn.grid_propagate(False)
 
@@ -608,6 +604,9 @@ class Dungeon:
 
             new_frame = game.create_frame(dungeon_frame)
             new_frame.grid(row=row, column=col, sticky='nsew')
+            new_frame.grid_rowconfigure(row, weight=1)
+            new_frame.grid_columnconfigure(col, weight=1)
+            new_frame.grid_propagate(False)
             btn = game.create_button(ch, new_frame, 'dungeon')
             btn.grid(row=row, column=col, sticky='nsew')
 
