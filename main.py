@@ -16,6 +16,7 @@ else:
     from tkinter import Button
 import random
 import tkinter.scrolledtext as scrolledtext
+from tkinter import messagebox as msgbox
 
 #import tktooltip
 
@@ -68,12 +69,12 @@ big_left_frame_horizontal_blank_frame.grid(row=0, column=1, sticky='ew')
 stats_header = tk.Label(stats_frame, text='Stats:', font=bold_large_font, bg='black', fg='white')
 stats_vertical_blank_frame = tk.Frame(stats_frame, height=200, bg='black')
 stats_horizontal_blank_frame = tk.Frame(stats_frame, width=50, bg='black')
-stats_hp_text = tk.Label(stats_frame, text='HP: XX/XX', font=medium_font, bg='black', fg='white', width=16, anchor='w')
-stats_damage_text = tk.Label(stats_frame, text='Damage: XX-XX', font=medium_font, bg='black', fg='white', width=16, anchor='w')
-stats_speed_text = tk.Label(stats_frame, text='Speed: XX', font=medium_font, bg='black', fg='white', width=16, anchor='w')
-stats_crit_chance_text = tk.Label(stats_frame, text='Crit Chance: XX%', font=medium_font, bg='black', fg='white', width=16, anchor='w')
-stats_crit_multiplier_text = tk.Label(stats_frame, text='Crit Mult: XXx', font=medium_font, bg='black', fg='white', width=16, anchor='w')
-stats_miss_chance_text = tk.Label(stats_frame, text='Miss Chance: XX%', font=medium_font, bg='black', fg='white', width=16, anchor='w')
+stats_hp_text = tk.Label(stats_frame, text='HP: XX/XX', font=small_font, bg='black', fg='white', width=16, anchor='w')
+stats_damage_text = tk.Label(stats_frame, text='Damage: XX-XX', font=small_font, bg='black', fg='white', width=16, anchor='w')
+stats_speed_text = tk.Label(stats_frame, text='Speed: XX', font=small_font, bg='black', fg='white', width=16, anchor='w')
+stats_crit_chance_text = tk.Label(stats_frame, text='Crit Chance: XX%', font=small_font, bg='black', fg='white', width=17, anchor='w')
+stats_crit_multiplier_text = tk.Label(stats_frame, text='Crit Mult: XXx', font=small_font, bg='black', fg='white', width=17, anchor='w')
+stats_miss_chance_text = tk.Label(stats_frame, text='Miss Chance: XX%', font=small_font, bg='black', fg='white', width=17, anchor='w')
 stats_text_list = [stats_hp_text, stats_damage_text, stats_speed_text, stats_crit_chance_text, stats_crit_multiplier_text, stats_miss_chance_text]
 
 stats_horizontal_blank_frame.grid(row=0, column=0, rowspan=100, sticky='ew')
@@ -90,15 +91,15 @@ for text in stats_text_list:
     text.grid_propagate(False)
 
 inventory_frame = tk.Frame(big_right_frame, width=500, bg='black')
-horizontal_blank_frame = tk.Frame(big_right_frame, height=50, bg='black')
-right_vertical_blank_frame = tk.Frame(big_right_frame, width=50, bg='black')
+vertical_blank_frame = tk.Frame(big_right_frame, height=50, bg='black')
+right_horizontal_blank_frame = tk.Frame(big_right_frame, width=30, bg='black')
 dungeon_frame = tk.Frame(big_right_frame, bg='black')
 log_frame = tk.Frame(big_right_frame, bg='black')
 
 inventory_frame.grid(row=0, column=1, sticky='n')
-horizontal_blank_frame.grid(row=1, column=1, sticky='ew')
+vertical_blank_frame.grid(row=1, column=1, sticky='ew')
 dungeon_frame.grid(row=2, column=1, sticky='ns')
-right_vertical_blank_frame.grid(row=0, column=2, sticky='ns')
+right_horizontal_blank_frame.grid(row=0, column=2, sticky='ns')
 log_frame.grid(row=2, column=3, sticky='nsew')
 
 dummy_button = Button(window, text='ppp')
@@ -147,7 +148,7 @@ vertical_directions = ['up', 'down']
 
 class GameController:
     def __init__(self):
-        self.testing = True
+        self.testing = False
         # Item, entity, and object glyphs
         if True:
             self.turn = 'player'
@@ -169,7 +170,7 @@ class GameController:
                          '⛓⛓⛓⛓\n'
                          '⛓⛓⛓⛓')
             self.locked_bars = ('⛓⛓⛓⛓\n'
-                                '⛓⛓∅⛓\n'
+                                '⛓⛓⚿⛓\n'
                                 '⛓⛓⛓⛓\n'
                                 '⛓⛓⛓⛓')
             self.broken_bars = ('⛓ ⛓⛓\n'
@@ -239,8 +240,9 @@ class GameController:
         self.game_log = None
         self.game_log_text = ""
 
-        self.entered_new_level = False
+        self.initializing_level = False
         self.updated_game_log_this_turn = False
+        self.player_started_loading = False
 
         self.make_log()
 
@@ -352,8 +354,8 @@ class GameController:
                         player.steps_to_take_after_pressing_wasd()
                     case 'interaction':
                         player.interact()
-                        if self.entered_new_level:
-                            self.entered_new_level = False
+                        if self.initializing_level:
+                            self.initializing_level = False
                             break
             else:
                 if entity.is_alive:
@@ -370,6 +372,7 @@ class GameController:
                 player.miss_chance = (enemy.speed / player.speed) * 10
                 game.update_player_stats(['miss chance'])
         player.apply_highlight_to_button()
+        game.add_hp_bg_to_entity_tile(player)
 
         game.update_log('add turn division', None)
 
@@ -385,33 +388,34 @@ class GameController:
         self.game_log.grid(row=0, column=0)
 
     def update_log(self, event_type, event_objects):
+        log_text = ''
         if event_type == 'item picked up':
             if event_objects == game.small_health_potion:
                 event_objects = 'Small Health Potion'
-            log_text = f"{event_objects} has been picked up!\n"
+            log_text += f"{event_objects} has been picked up!\n"
             """first_word, other_text = text.split(' ', 1)
             text_list = [first_word, other_text]
             first_word.title()
             " ".join(text_list)
             print(text_list)"""
         elif event_type == 'combat':
-            attacker, attacked, damage = event_objects
-            log_text = f"{attacker} hit {attacked} for {damage} damage!\n"
+            attacker, attacked, damage, crit_happened = event_objects
+            if crit_happened:
+                log_text += f"CRITICAL HIT! "
+            log_text += f"{attacker} hit {attacked} for {damage} damage!\n"
         elif event_type == 'missed attack':
             attacker, attacked = event_objects
             log_text = f"{attacker} missed {attacked}!\n"
         elif event_type == 'killed entity':
             attacker, attacked = event_objects
-            log_text = f"{attacker} {random.choice(['murdered', 'killed', 'exsanguinated', 'slayed', 'dispatched', 'took care of', 'executed', 'slaughtered', 'felled', 'took out', 'annihilated', 'blotted out', 'removed', 'terminated', 'exterminated', 'neutralized', 'liquidated', 'erased', 'obliterated', 'wasted'])} {attacked}!\n"
+            log_text += f"{attacker} {random.choice(['murdered', 'killed', 'exsanguinated', 'slayed', 'dispatched', 'took care of', 'executed', 'slaughtered', 'felled', 'took out', 'annihilated', 'blotted out', 'removed', 'terminated', 'exterminated', 'neutralized', 'liquidated', 'erased', 'obliterated', 'wasted'])} {attacked}!\n"
         elif event_type == 'add turn division':
             if self.updated_game_log_this_turn:
                 print('division time!!')
-                log_text = '\n'
-                print(self.game_log['width'])
+                log_text += '\n'
                 for char in range(int(self.game_log['width'])):
                     log_text += '-'
                 log_text += '\n\n'
-            else: log_text = ''
         self.game_log['state'] = 'normal'
         # noinspection PyUnboundLocalVariable
         self.game_log.insert('1.0', log_text)
@@ -430,7 +434,7 @@ class GameController:
             del dungeon.speed_of_current_entities[enemy]
             del dungeon.ordered_speed_of_current_entities[enemy]
             del dungeon.current_enemies[enemy_index]
-            del dungeon.current_entities[enemy_index]
+            del dungeon.current_entities[int(enemy_index) + 1]
             del dungeon.dead_enemies_this_turn[key]
             break
 
@@ -461,10 +465,23 @@ class GameController:
         arrow_used = self.direction_arrows[highlight_direction]
         entity_tile[get_btn]['text'] += f'\n{arrow_used}'
 
+    @staticmethod
+    def add_hp_bg_to_entity_tile(entity):
+        if player.rendered_light_levels[entity.tile_itself] > 0:
+            if entity.hp / entity.max_hp <= 0.25:
+                entity.tile_itself[get_btn]['bg'] = 'maroon'
+            elif entity.hp / entity.max_hp <= 0.5:
+                entity.tile_itself[get_btn]['bg'] = 'orange'
+            elif entity.hp / entity.max_hp <= 0.75:
+                entity.tile_itself[get_btn]['bg'] = 'gold'
+            elif entity.hp / entity.max_hp < 1:
+                entity.tile_itself[get_btn]['bg'] = 'green'
+                # dungeon.tiles_indexed_by_coords[tuple(entity.prev_coords)][get_btn]['bg'] = game.lighting_colors[player.rendered_light_levels[dungeon.tiles_indexed_by_coords[tuple(entity.prev_coords)]]]
+
 
 class Dungeon:
     def __init__(self):
-        self.level = 2
+        self.level = 1
 
         self.lowest_light_level_in_current_level = 0
 
@@ -641,25 +658,22 @@ class Dungeon:
         return any(obj in the_btn['text'] for obj in objects_to_check)
 
     def go_to_new_location(self, entity, entity_coords, prev_entity_coords):
-        new_tile = self.tiles_indexed_by_coords[tuple(entity_coords)][get_btn]
-        prev_tile = self.tiles_indexed_by_coords[tuple(prev_entity_coords)][get_btn]
-        prev_tile['text'] = ' '
-        new_tile['text'] = entity
+        new_tile = self.tiles_indexed_by_coords[tuple(entity_coords)]
+        prev_tile = self.tiles_indexed_by_coords[tuple(prev_entity_coords)]
+        prev_tile[get_btn]['text'] = ' '
+        new_tile[get_btn]['text'] = entity
 
     def locate_important_objects_and_entities(self):
         for i, (enemy_type, row, col) in self.current_enemies.items():
             if enemy_type == game.zombie:
                 self.current_enemies[i] = Zombie(enemy_type, row, col)
-                self.current_entities[i] = self.current_enemies[i]
+                self.current_entities[i + 1] = self.current_enemies[i]
                 self.speed_of_current_entities[self.current_enemies[i]] = self.current_enemies[i].speed
-        dungeon.ordered_speed_of_current_entities = {key: val for key, val in
-                                                     sorted(dungeon.speed_of_current_entities.items(),
-                                                            key=lambda item: item[1], reverse=True)}
+        self.ordered_speed_of_current_entities = {key: val for key, val in sorted(dungeon.speed_of_current_entities.items(), key=lambda item: item[1], reverse=True)}
 
-    def next_level(self):
+    def initialize_a_level(self):
         self.finished_loading = False
-        game.entered_new_level = True
-        self.level += 1
+        game.initializing_level = True
         #print(self.tiles)
         for coords, (frame, btn) in self.tiles_indexed_by_coords.items():
             frame.destroy()
@@ -766,7 +780,7 @@ class Inventory:
         self.select_item(self.inventory[int(num) - 1])
 
     def influence_player_highlight(self):
-        print(self.selected_item_slot)
+        #print(self.selected_item_slot)
         selected_item = self.selected_item_slot[get_btn]['text']
         if selected_item in game.weapons:
             self.weapon_selected = True
@@ -837,6 +851,7 @@ class Player:
             if btn['text'] == game.player:
                 self.coords = list(coords)
                 self.tile_itself = (frame, btn)
+                self.prev_tile_itself = None
 
         dungeon.current_entities[len(dungeon.current_entities)] = self
         dungeon.speed_of_current_entities[self] = self.speed
@@ -851,6 +866,14 @@ class Player:
         self.determine_highlighted_buttons()
         self.apply_highlight_to_button()
         game.add_arrow_equivalent_to_looking_dir(game.player, self.tile_itself, self.highlight_direction)
+        if self.hp / self.max_hp <= 0.25:
+            self.tile_itself[get_btn]['bg'] = 'maroon'
+        elif self.hp / self.max_hp <= 0.5:
+            self.tile_itself[get_btn]['bg'] = 'orange'
+        elif self.hp / self.max_hp <= 0.75:
+            self.tile_itself[get_btn]['bg'] = 'gold'
+        elif self.hp / self.max_hp < 1:
+            self.tile_itself[get_btn]['bg'] = 'green'
 
     def determine_vision_direction(self):
         self.prev_vision_direction = self.vision_direction
@@ -960,7 +983,8 @@ class Player:
                         inv.destroy_selected_item()
                     elif interacted_spot in game.exit_arrows:
                         #print('exited room')
-                        dungeon.next_level()
+                        dungeon.level += 1
+                        dungeon.initialize_a_level()
                     elif interacted_spot in game.singular_interactable_items:
                         for item in game.singular_interactable_items:
                             if item == game.small_health_potion:
@@ -977,7 +1001,7 @@ class Player:
                             if enemy.tile_itself == interacted_tile:
                                 distance_to_enemy = interacted_tile_number
                                 self.damage = weapons.calculate_its_damage(inv.selected_item_slot[get_btn]['text'], distance_to_enemy)
-                                print('player attack')
+                                #print('player attack')
                                 Combat(attacker=self, attacked=enemy)
                                 break
             if self.highlight_range > 1:
@@ -1014,6 +1038,7 @@ class Player:
 
             self.prev_coords = self.coords.copy()
             self.coords = dungeon.find_new_location(game.player, self.coords, self.prev_coords, self.movement_direction)
+            self.prev_tile_itself = self.tile_itself[:]
             self.tile_itself = dungeon.tiles_indexed_by_coords[tuple(self.coords)]
             if self.prev_coords == self.coords:
                 self.changed_location = False
@@ -1124,7 +1149,8 @@ class Player:
                 old_light_level = self.prev_rendered_light_levels[(frame, btn)]
 
                 if new_light_level == old_light_level:
-                    continue
+                    if (frame, btn) != self.prev_tile_itself:
+                        continue
 
                 tile_color = game.lighting_colors[new_light_level]
 
@@ -1150,7 +1176,33 @@ class Player:
         self.vision_changed = True
 
     def kill_self(self):
-        pass
+        self.hp = self.max_hp
+        self.highlight_direction = 'up'
+        self.prev_highlight_direction = 'left'
+        self.vision_direction = 'up'
+        self.prev_vision_direction = 'left'
+
+        self.highlight_color = game.default_highlight_color
+        self.highlight_range = 1
+
+        self.changed_location = False
+        self.vision_changed = True
+
+        respawn = msgbox.askyesno('The Death Screen', 'You have been killed by an enemy.\nRespawn?')
+        if respawn:
+            dungeon.initialize_a_level()
+        else:
+            dungeon.initialize_a_level()
+
+        game.game_log['state'] = 'normal'
+        game.game_log.delete('1.0', 'end')
+        game.game_log['state'] = 'disabled'
+
+        for slot in inv.inventory.values():
+            slot[get_btn]['text'] = ' '
+
+        game.update_player_stats(['hp', 'damage', 'speed', 'crit chance', 'crit multiplier', 'miss chance'])
+        game.add_hp_bg_to_entity_tile(self)
 
 
 class Enemy:
@@ -1208,9 +1260,13 @@ class Enemy:
 
     def check_self_visibility_and_highlight_status(self):
         self.prev_visible_to_player = self.is_visible_to_player
-        if player.rendered_light_levels.get(self.tile_itself, 0) > 0:
+        dungeon.tiles_indexed_by_coords[tuple(self.prev_coords)][get_btn]['bg'] = game.lighting_colors[
+            player.rendered_light_levels[dungeon.tiles_indexed_by_coords[tuple(self.prev_coords)]]]
+        if player.rendered_light_levels[self.tile_itself] > 0:
             self.is_visible_to_player = True
             self.do_highlight = True
+            print(f'ola, {self.coords}')
+            game.add_hp_bg_to_entity_tile(self)
         else:
             self.is_visible_to_player = False
             self.do_highlight = False
@@ -1387,7 +1443,7 @@ class Enemy:
         return self.light_levels_by_tile
 
     def kill_self(self):
-        self.tile_itself[get_btn].config(text=' ')
+        self.tile_itself[get_btn].config(text=' ', bg=game.lighting_colors[player.rendered_light_levels[self.tile_itself]])
         self.is_alive = False
         dungeon.dead_enemies_this_turn[len(dungeon.dead_enemies_this_turn)] = self
 
@@ -1548,7 +1604,6 @@ class Zombie(Enemy):
 
     def attack_player(self):
         if self.highlighted_coords == player.coords:
-            print('enemy attack')
             self.damage = random.choice(self.damage_range)
             self.miss_chance = (player.speed / self.speed) * 10
             Combat(attacker=self, attacked=player)
@@ -1556,7 +1611,7 @@ class Zombie(Enemy):
 
 class Combat:
     def __init__(self, attacker, attacked):
-
+        self.crit_happened = False
         rng = random.randint(1, 101)
         rng2 = random.randint(1, 101)
         rng3 = random.randint(1, 101)
@@ -1571,32 +1626,33 @@ class Combat:
         attacker_damage = attacker.damage
         if attacker.crit_chance >= chosen_rng:
             attacker_damage *= attacker.crit_multiplier
+            self.crit_happened = True
         attacked.hp -= attacker_damage
         print(attacker, attacked)
         if isinstance(attacker, Enemy):
-            game.update_log('combat', [attacker.enemy_type, 'you', attacker_damage])
+            game.update_log('combat', [attacker.enemy_type, 'you', attacker_damage, self.crit_happened])
             game.update_player_stats(['hp'])
         else:
-            game.update_log('combat', ['You', attacked.enemy_type, attacker_damage])
+            game.update_log('combat', ['You', attacked.enemy_type, attacker_damage, self.crit_happened])
 
         if attacked.hp <= 0:
-            attacked.kill_self()
             if isinstance(attacker, Enemy):
                 game.update_log('killed entity', [attacker.enemy_type, 'you'])
             else:
                 game.update_log('killed entity', ['You', attacked.enemy_type])
+            attacked.kill_self()
 
 
 class Weapons:
     def __init__(self):
         self.damage_dictionary = {
             game.dagger: [2, 3, 4],
-            game.shortsword: [2, 3, 4],
+            game.shortsword: [3, 4, 5],
             # Index of game.whip dict is enemy distance
             game.whip: {
                 1: [1, 2],
-                2: [3, 4],
-                3: [6, 7, 8],
+                2: [2, 3],
+                3: [5, 6, 7],
             },
             None: 0,
         }
@@ -1742,6 +1798,7 @@ game = GameController()
 vision = Shadowcasting()
 dungeon = Dungeon()
 inv = Inventory()
+game.player_started_loading = True
 player = Player()
 weapons = Weapons()
 dungeon.locate_important_objects_and_entities()
